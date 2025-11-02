@@ -77,16 +77,26 @@ Preferred communication style: Simple, everyday language.
 **Initial Admin Setup:**
 - First user must be promoted to admin via SQL: `UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';`
 - After that, admins can manage all user roles through the `/admin` panel
+- **Pre-registration system**: Admins can pre-assign roles to users by email before their first login
+  - New users automatically receive pre-assigned role during authentication
+  - Pre-assigned roles are marked as consumed after first login
+  - Supports employee and admin role pre-assignment for controlled access
+
+**Password Recovery:**
+- Password recovery is managed through Replit Auth (OIDC provider)
+- Users can click "Esqueci minha senha" in the header to see instructions
+- Recovery process uses Replit's "Forgot password?" link on login screen
 
 ### Database Schema
 
 **Core Tables:**
 1. **users**: User accounts with role-based permissions (client, employee, admin), LGPD acceptance tracking
-2. **products**: Cupcake products with name, description, price, image, stock quantity
+2. **products**: Cupcake products with name, description, price, image, stock quantity, **isActive** (soft delete flag)
 3. **orders**: Customer orders with status tracking (pending, in_preparation, ready_for_delivery, delivered)
 4. **orderItems**: Individual line items within orders with price snapshot at purchase
 5. **reviews**: Product reviews with ratings (1-5) and comments, linked to verified purchases
 6. **sessions**: Session storage for authentication (required by Replit Auth)
+7. **preassigned_roles**: Pre-assigned roles for users before first login (email, role, createdBy, consumed)
 
 **Key Relationships:**
 - Users → Orders (one-to-many)
@@ -94,11 +104,14 @@ Preferred communication style: Simple, everyday language.
 - Products → OrderItems (one-to-many)
 - Products → Reviews (one-to-many)
 - Users → Reviews (one-to-many)
+- Admin Users → Preassigned Roles (one-to-many via createdBy)
 
 **Data Integrity:**
 - Price captured at purchase time in orderItems (historical accuracy)
 - Review validation: users can only review products they've purchased
 - Soft validation on stock quantities
+- **Soft delete on products**: Products are deactivated (isActive=false) instead of deleted to preserve order history
+- **Pre-assigned roles**: Admins can assign roles by email before user's first login, automatically applied during authentication
 
 ### External Dependencies
 
