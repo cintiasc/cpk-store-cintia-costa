@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingCart, User, LogOut, LayoutDashboard } from "lucide-react";
+import { ShoppingCart, User, LogOut, LayoutDashboard, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
@@ -11,6 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export function Header() {
   const [location] = useLocation();
@@ -115,9 +123,42 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild data-testid="button-login">
-              <a href="/api/login">Entrar</a>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm" data-testid="link-forgot-password">
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Esqueci minha senha
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Recuperar Senha</DialogTitle>
+                    <DialogDescription>
+                      A recuperação de senha é gerenciada através do Replit Auth.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <p className="text-sm text-muted-foreground">
+                      Para recuperar sua senha, siga estes passos:
+                    </p>
+                    <ol className="list-decimal list-inside space-y-2 text-sm">
+                      <li>Clique no botão "Entrar" para ir à tela de login</li>
+                      <li>Na tela de login do Replit, clique em <strong>"Forgot password?"</strong></li>
+                      <li>Siga as instruções enviadas para seu email</li>
+                    </ol>
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button asChild data-testid="button-goto-login">
+                        <a href="/api/login">Ir para Login</a>
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Button asChild data-testid="button-login">
+                <a href="/api/login">Entrar</a>
+              </Button>
+            </div>
           )}
         </div>
       </div>

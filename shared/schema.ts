@@ -12,6 +12,7 @@ import {
   integer,
   pgEnum,
   check,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -46,6 +47,16 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Preassigned roles table (for admin to assign roles before first login)
+export const preassignedRoles = pgTable("preassigned_roles", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  role: userRoleEnum("role").notNull(),
+  createdBy: varchar("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  consumed: boolean("consumed").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Products table
 export const products = pgTable("products", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -53,6 +64,7 @@ export const products = pgTable("products", {
   description: text("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   imageUrl: varchar("image_url", { length: 500 }),
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -137,6 +149,7 @@ export type User = typeof users.$inferSelect;
 // Types for Products
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
+  isActive: true,
   createdAt: true,
   updatedAt: true,
 });
@@ -185,3 +198,12 @@ export type ProductWithRating = Product & {
 export type ReviewWithUser = Review & {
   user: User;
 };
+
+// Types for Preassigned Roles
+export const insertPreassignedRoleSchema = createInsertSchema(preassignedRoles).omit({
+  id: true,
+  consumed: true,
+  createdAt: true,
+});
+export type InsertPreassignedRole = z.infer<typeof insertPreassignedRoleSchema>;
+export type PreassignedRole = typeof preassignedRoles.$inferSelect;

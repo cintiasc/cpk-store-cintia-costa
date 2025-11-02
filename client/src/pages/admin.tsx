@@ -1,9 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -15,12 +24,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { User } from "@shared/schema";
-import { Trash2 } from "lucide-react";
+import type { User, PreassignedRole } from "@shared/schema";
+import { Trash2, UserPlus } from "lucide-react";
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const [newUserDialogOpen, setNewUserDialogOpen] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserRole, setNewUserRole] = useState<string>("client");
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -37,6 +49,11 @@ export default function Admin() {
 
   const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
+    enabled: !!user && isAdmin,
+  });
+
+  const { data: preassignedRoles } = useQuery<PreassignedRole[]>({
+    queryKey: ["/api/admin/preassigned-roles"],
     enabled: !!user && isAdmin,
   });
 
@@ -102,6 +119,83 @@ export default function Admin() {
     },
   });
 
+  const createPreassignedRoleMutation = useMutation({
+    mutationFn: async ({ email, role }: { email: string; role: string }) => {
+      return await apiRequest("POST", "/api/admin/preassigned-roles", { email, role });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Usuário pré-cadastrado",
+        description: "Usuário receberá este perfil no primeiro login",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/preassigned-roles"] });
+      setNewUserDialogOpen(false);
+      setNewUserEmail("");
+      setNewUserRole("client");
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Não Autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Erro",
+        description: error.message || "Falha ao pré-cadastrar usuário",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deletePreassignedRoleMutation = useMutation({
+    mutationFn: async (roleId: number) => {
+      return await apiRequest("DELETE", `/api/admin/preassigned-roles/${roleId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Pré-cadastro removido",
+        description: "Atribuição de perfil foi removida",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/preassigned-roles"] });
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Não Autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Erro",
+        description: error.message || "Falha ao remover pré-cadastro",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreatePreassignedRole = () => {
+    if (!newUserEmail || !newUserRole) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha o email e selecione um perfil",
+        variant: "destructive",
+      });
+      return;
+    }
+    createPreassignedRoleMutation.mutate({ email: newUserEmail, role: newUserRole });
+  };
+
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "admin":
@@ -136,12 +230,129 @@ export default function Admin() {
       
       <main className="container mx-auto px-4 py-12">
         <h1 className="font-serif text-4xl font-bold mb-8" data-testid="text-admin-title">
-          Gerenciamento de Usuários
+          Painel de Administração
         </h1>
 
-        <div className="space-y-4">
-          {users && users.length > 0 ? (
-            users.map((userItem) => (
+        {/* Preassigned Roles Section */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="font-serif text-2xl font-semibold">Cadastrar Novo Usuário</h2>
+            <Dialog open={newUserDialogOpen} onOpenChange={setNewUserDialogOpen}>
+              <DialogTrigger asChild>
+                <Button data-testid="button-add-user">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Adicionar Usuário
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Pré-cadastrar Novo Usuário</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email do Usuário</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="usuario@exemplo.com"
+                      value={newUserEmail}
+                      onChange={(e) => setNewUserEmail(e.target.value)}
+                      data-testid="input-new-user-email"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      O usuário receberá este perfil automaticamente no primeiro login
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Perfil</Label>
+                    <Select value={newUserRole} onValueChange={setNewUserRole}>
+                      <SelectTrigger data-testid="select-new-user-role">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="client">Cliente</SelectItem>
+                        <SelectItem value="employee">Funcionário</SelectItem>
+                        <SelectItem value="admin">Administrador</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setNewUserDialogOpen(false)}
+                      data-testid="button-cancel-new-user"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      onClick={handleCreatePreassignedRole}
+                      disabled={createPreassignedRoleMutation.isPending}
+                      data-testid="button-save-new-user"
+                    >
+                      {createPreassignedRoleMutation.isPending ? "Salvando..." : "Cadastrar"}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="space-y-3">
+            {preassignedRoles && preassignedRoles.length > 0 ? (
+              preassignedRoles.map((preassigned) => (
+                <Card key={preassigned.id} className="p-4" data-testid={`card-preassigned-${preassigned.id}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <p className="font-medium" data-testid={`text-preassigned-email-${preassigned.id}`}>
+                          {preassigned.email}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge className={getRoleBadgeColor(preassigned.role)} data-testid={`badge-preassigned-role-${preassigned.id}`}>
+                            {preassigned.role === "client" ? "Cliente" :
+                             preassigned.role === "employee" ? "Funcionário" :
+                             preassigned.role === "admin" ? "Administrador" : preassigned.role}
+                          </Badge>
+                          {preassigned.consumed && (
+                            <Badge variant="outline" className="text-xs">
+                              Aplicado
+                            </Badge>
+                          )}
+                          {!preassigned.consumed && (
+                            <span className="text-xs text-muted-foreground">
+                              Aguardando primeiro login
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => deletePreassignedRoleMutation.mutate(preassigned.id)}
+                      disabled={deletePreassignedRoleMutation.isPending}
+                      data-testid={`button-delete-preassigned-${preassigned.id}`}
+                      title="Remover pré-cadastro"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-4 text-sm" data-testid="text-no-preassigned">
+                Nenhum usuário pré-cadastrado
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Existing Users Section */}
+        <section>
+          <h2 className="font-serif text-2xl font-semibold mb-6">Usuários Existentes</h2>
+          <div className="space-y-4">
+            {users && users.length > 0 ? (
+              users.map((userItem) => (
               <Card key={userItem.id} className="p-6" data-testid={`card-user-${userItem.id}`}>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-center gap-4">
@@ -209,13 +420,14 @@ export default function Admin() {
                   </div>
                 </div>
               </Card>
-            ))
-          ) : (
-            <p className="text-center text-muted-foreground py-8" data-testid="text-no-users">
-              Nenhum usuário encontrado
-            </p>
-          )}
-        </div>
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-8" data-testid="text-no-users">
+                Nenhum usuário encontrado
+              </p>
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );

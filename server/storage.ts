@@ -5,6 +5,7 @@ import {
   orders,
   orderItems,
   reviews,
+  preassignedRoles,
   type User,
   type UpsertUser,
   type Product,
@@ -18,6 +19,8 @@ import {
   type OrderWithItems,
   type ProductWithRating,
   type ReviewWithUser,
+  type PreassignedRole,
+  type InsertPreassignedRole,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and } from "drizzle-orm";
@@ -52,6 +55,13 @@ export interface IStorage {
   
   // Cart operations
   getOrderItems(orderId: number): Promise<(OrderItem & { product: Product })[]>;
+  
+  // Preassigned roles operations
+  createPreassignedRole(data: InsertPreassignedRole): Promise<PreassignedRole>;
+  getAllPreassignedRoles(): Promise<PreassignedRole[]>;
+  getPreassignedRoleByEmail(email: string): Promise<PreassignedRole | undefined>;
+  deletePreassignedRole(id: number): Promise<void>;
+  markPreassignedRoleAsConsumed(email: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -102,6 +112,7 @@ export class DatabaseStorage implements IStorage {
         description: products.description,
         price: products.price,
         imageUrl: products.imageUrl,
+        isActive: products.isActive,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
         averageRating: sql<number>`COALESCE(AVG(${reviews.rating}::numeric), 0)`,
@@ -109,6 +120,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(products)
       .leftJoin(reviews, eq(products.id, reviews.productId))
+      .where(eq(products.isActive, true))
       .groupBy(products.id)
       .orderBy(desc(products.createdAt));
 
@@ -127,6 +139,7 @@ export class DatabaseStorage implements IStorage {
         description: products.description,
         price: products.price,
         imageUrl: products.imageUrl,
+        isActive: products.isActive,
         createdAt: products.createdAt,
         updatedAt: products.updatedAt,
         averageRating: sql<number>`COALESCE(AVG(${reviews.rating}::numeric), 0)`,
@@ -161,7 +174,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProduct(id: number): Promise<void> {
-    await db.delete(products).where(eq(products.id, id));
+    // Soft delete: set isActive to false instead of deleting
+    await db
+      .update(products)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(products.id, id));
   }
 
   // Order operations
@@ -293,6 +310,38 @@ export class DatabaseStorage implements IStorage {
     });
 
     return items;
+  }
+
+  // Preassigned roles operations
+  async createPreassignedRole(data: InsertPreassignedRole): Promise<PreassignedRole> {
+    const [preassignedRole] = await db.insert(preassignedRoles).values(data).returning();
+    return preassignedRole;
+  }
+
+  async getAllPreassignedRoles(): Promise<PreassignedRole[]> {
+    return await db.select().from(preassignedRoles).orderBy(desc(preassignedRoles.createdAt));
+  }
+
+  async getPreassignedRoleByEmail(email: string): Promise<PreassignedRole | undefined> {
+    const [result] = await db
+      .select()
+      .from(preassignedRoles)
+      .where(and(
+        eq(preassignedRoles.email, email),
+        eq(preassignedRoles.consumed, false)
+      ));
+    return result;
+  }
+
+  async deletePreassignedRole(id: number): Promise<void> {
+    await db.delete(preassignedRoles).where(eq(preassignedRoles.id, id));
+  }
+
+  async markPreassignedRoleAsConsumed(email: string): Promise<void> {
+    await db
+      .update(preassignedRoles)
+      .set({ consumed: true })
+      .where(eq(preassignedRoles.email, email));
   }
 }
 

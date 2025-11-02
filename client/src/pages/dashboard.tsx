@@ -119,8 +119,8 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       toast({
-        title: "Produto excluído",
-        description: "Produto foi removido",
+        title: "Produto desativado",
+        description: "Produto foi removido do catálogo",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
     },
@@ -138,7 +138,7 @@ export default function Dashboard() {
       }
       toast({
         title: "Erro",
-        description: error.message || "Falha ao excluir produto",
+        description: error.message || "Falha ao desativar produto",
         variant: "destructive",
       });
     },

@@ -54,14 +54,32 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
+  const userId = claims["sub"];
+  const userEmail = claims["email"];
+  
+  // Check if user already exists
+  const existingUser = await storage.getUser(userId);
+  
+  // Upsert user
   await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
+    id: userId,
+    email: userEmail,
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
     lgpdAccepted: new Date(), // Auto-accept LGPD on first login
   });
+  
+  // If it's a new user (first login), check for preassigned role
+  if (!existingUser && userEmail) {
+    const preassignedRole = await storage.getPreassignedRoleByEmail(userEmail);
+    if (preassignedRole) {
+      // Apply the preassigned role
+      await storage.updateUserRole(userId, preassignedRole.role);
+      // Mark as consumed
+      await storage.markPreassignedRoleAsConsumed(userEmail);
+    }
+  }
 }
 
 export async function setupAuth(app: Express) {

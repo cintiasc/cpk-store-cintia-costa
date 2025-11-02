@@ -80,10 +80,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const productId = parseInt(req.params.id);
       await storage.deleteProduct(productId);
-      res.status(204).send();
+      res.json({ message: "Produto desativado com sucesso" });
     } catch (error) {
-      console.error("Error deleting product:", error);
-      res.status(500).json({ message: "Failed to delete product" });
+      console.error("Error deactivating product:", error);
+      res.status(500).json({ message: "Falha ao desativar produto" });
     }
   });
 
@@ -268,6 +268,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting user:", error);
       res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Preassigned roles routes
+  app.get('/api/admin/preassigned-roles', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const preassignedRoles = await storage.getAllPreassignedRoles();
+      res.json(preassignedRoles);
+    } catch (error) {
+      console.error("Error fetching preassigned roles:", error);
+      res.status(500).json({ message: "Falha ao buscar perfis pré-atribuídos" });
+    }
+  });
+
+  app.post('/api/admin/preassigned-roles', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email, role } = req.body;
+      const createdBy = req.user.claims.sub;
+      
+      if (!email || !role) {
+        return res.status(400).json({ message: "Email e perfil são obrigatórios" });
+      }
+      
+      if (!['client', 'employee', 'admin'].includes(role)) {
+        return res.status(400).json({ message: "Perfil inválido" });
+      }
+      
+      const preassignedRole = await storage.createPreassignedRole({ email, role, createdBy });
+      res.status(201).json(preassignedRole);
+    } catch (error: any) {
+      console.error("Error creating preassigned role:", error);
+      if (error.code === '23505') { // Unique violation
+        return res.status(409).json({ message: "Já existe uma atribuição de perfil para este email" });
+      }
+      res.status(400).json({ message: error.message || "Falha ao criar perfil pré-atribuído" });
+    }
+  });
+
+  app.delete('/api/admin/preassigned-roles/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const roleId = parseInt(req.params.id);
+      await storage.deletePreassignedRole(roleId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting preassigned role:", error);
+      res.status(500).json({ message: "Falha ao deletar perfil pré-atribuído" });
     }
   });
 
