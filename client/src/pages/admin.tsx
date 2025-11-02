@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -32,6 +33,8 @@ export default function Admin() {
   const { toast } = useToast();
   const [newUserDialogOpen, setNewUserDialogOpen] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserFirstName, setNewUserFirstName] = useState("");
+  const [newUserLastName, setNewUserLastName] = useState("");
   const [newUserRole, setNewUserRole] = useState<string>("client");
 
   useEffect(() => {
@@ -120,8 +123,8 @@ export default function Admin() {
   });
 
   const createPreassignedRoleMutation = useMutation({
-    mutationFn: async ({ email, role }: { email: string; role: string }) => {
-      return await apiRequest("POST", "/api/admin/preassigned-roles", { email, role });
+    mutationFn: async ({ email, firstName, lastName, role }: { email: string; firstName?: string; lastName?: string; role: string }) => {
+      return await apiRequest("POST", "/api/admin/preassigned-roles", { email, firstName, lastName, role });
     },
     onSuccess: () => {
       toast({
@@ -131,6 +134,8 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/preassigned-roles"] });
       setNewUserDialogOpen(false);
       setNewUserEmail("");
+      setNewUserFirstName("");
+      setNewUserLastName("");
       setNewUserRole("client");
     },
     onError: (error: Error) => {
@@ -188,12 +193,17 @@ export default function Admin() {
     if (!newUserEmail || !newUserRole) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha o email e selecione um perfil",
+        description: "Por favor, preencha o email e selecione um nível de acesso",
         variant: "destructive",
       });
       return;
     }
-    createPreassignedRoleMutation.mutate({ email: newUserEmail, role: newUserRole });
+    createPreassignedRoleMutation.mutate({ 
+      email: newUserEmail, 
+      firstName: newUserFirstName || undefined,
+      lastName: newUserLastName || undefined,
+      role: newUserRole 
+    });
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -247,10 +257,36 @@ export default function Admin() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Pré-cadastrar Novo Usuário</DialogTitle>
+                  <DialogDescription>
+                    O usuário receberá o perfil e informações automaticamente no primeiro login.
+                    A senha será criada pelo usuário através do Replit Auth.
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email do Usuário</Label>
+                    <Label htmlFor="firstName">Nome</Label>
+                    <Input
+                      id="firstName"
+                      type="text"
+                      placeholder="João"
+                      value={newUserFirstName}
+                      onChange={(e) => setNewUserFirstName(e.target.value)}
+                      data-testid="input-new-user-firstname"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Sobrenome</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Silva"
+                      value={newUserLastName}
+                      onChange={(e) => setNewUserLastName(e.target.value)}
+                      data-testid="input-new-user-lastname"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       type="email"
@@ -259,12 +295,9 @@ export default function Admin() {
                       onChange={(e) => setNewUserEmail(e.target.value)}
                       data-testid="input-new-user-email"
                     />
-                    <p className="text-sm text-muted-foreground">
-                      O usuário receberá este perfil automaticamente no primeiro login
-                    </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="role">Perfil</Label>
+                    <Label htmlFor="role">Nível de Acesso</Label>
                     <Select value={newUserRole} onValueChange={setNewUserRole}>
                       <SelectTrigger data-testid="select-new-user-role">
                         <SelectValue />
@@ -304,7 +337,12 @@ export default function Admin() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div>
-                        <p className="font-medium" data-testid={`text-preassigned-email-${preassigned.id}`}>
+                        {(preassigned.firstName || preassigned.lastName) && (
+                          <p className="font-semibold" data-testid={`text-preassigned-name-${preassigned.id}`}>
+                            {preassigned.firstName} {preassigned.lastName}
+                          </p>
+                        )}
+                        <p className={`${preassigned.firstName || preassigned.lastName ? 'text-sm text-muted-foreground' : 'font-medium'}`} data-testid={`text-preassigned-email-${preassigned.id}`}>
                           {preassigned.email}
                         </p>
                         <div className="flex items-center gap-2 mt-1">

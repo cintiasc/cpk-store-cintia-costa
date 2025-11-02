@@ -284,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/preassigned-roles', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const { email, role } = req.body;
+      const { email, firstName, lastName, role } = req.body;
       const createdBy = req.user.claims.sub;
       
       if (!email || !role) {
@@ -295,7 +295,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Perfil inválido" });
       }
       
-      const preassignedRole = await storage.createPreassignedRole({ email, role, createdBy });
+      const preassignedRole = await storage.createPreassignedRole({ 
+        email, 
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        role, 
+        createdBy 
+      });
       res.status(201).json(preassignedRole);
     } catch (error: any) {
       console.error("Error creating preassigned role:", error);

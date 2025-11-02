@@ -60,25 +60,38 @@ async function upsertUser(
   // Check if user already exists
   const existingUser = await storage.getUser(userId);
   
-  // Upsert user
+  let firstName = claims["first_name"];
+  let lastName = claims["last_name"];
+  let preassignedRole = null;
+  
+  // If it's a new user (first login), check for preassigned role and names
+  if (!existingUser && userEmail) {
+    preassignedRole = await storage.getPreassignedRoleByEmail(userEmail);
+    if (preassignedRole) {
+      // Use preassigned names if provided and Replit profile is empty
+      if (preassignedRole.firstName && !firstName) {
+        firstName = preassignedRole.firstName;
+      }
+      if (preassignedRole.lastName && !lastName) {
+        lastName = preassignedRole.lastName;
+      }
+    }
+  }
+  
+  // Upsert user with names (from Replit or preassigned)
   await storage.upsertUser({
     id: userId,
     email: userEmail,
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
+    firstName,
+    lastName,
     profileImageUrl: claims["profile_image_url"],
-    lgpdAccepted: new Date(), // Auto-accept LGPD on first login
+    lgpdAccepted: existingUser ? existingUser.lgpdAccepted : new Date(), // Keep original LGPD date or set on first login
   });
   
-  // If it's a new user (first login), check for preassigned role
-  if (!existingUser && userEmail) {
-    const preassignedRole = await storage.getPreassignedRoleByEmail(userEmail);
-    if (preassignedRole) {
-      // Apply the preassigned role
-      await storage.updateUserRole(userId, preassignedRole.role);
-      // Mark as consumed
-      await storage.markPreassignedRoleAsConsumed(userEmail);
-    }
+  // AFTER creating the user, apply preassigned role if it exists
+  if (preassignedRole) {
+    await storage.updateUserRole(userId, preassignedRole.role);
+    await storage.markPreassignedRoleAsConsumed(userEmail);
   }
 }
 

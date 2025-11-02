@@ -39,7 +39,8 @@ export default function Orders() {
 
   const repeatOrderMutation = useMutation({
     mutationFn: async (orderId: number) => {
-      return await apiRequest("POST", `/api/orders/${orderId}/repeat`, {});
+      const response = await apiRequest("POST", `/api/orders/${orderId}/repeat`, {});
+      return await response.json();
     },
     onSuccess: (data: { items: any[] }) => {
       clearCart();

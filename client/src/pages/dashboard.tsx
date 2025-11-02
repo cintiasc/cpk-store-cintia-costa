@@ -154,6 +154,7 @@ export default function Dashboard() {
         description: "Status do pedido foi alterado",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/orders"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
