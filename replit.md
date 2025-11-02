@@ -62,6 +62,22 @@ Preferred communication style: Simple, everyday language.
 - `isEmployee`: Requires employee or admin role (product/order management)
 - `isAdmin`: Requires admin role (user management)
 
+**User Roles and Permissions:**
+- **Client (default)**: New users are automatically created with 'client' role on first login
+  - Can browse products, manage cart, place orders, write reviews
+  - Access to: `/`, `/products`, `/cart`, `/checkout`, `/orders`
+- **Employee**: Assigned by admin, can manage products and orders
+  - All client permissions plus product/order management
+  - Access to: `/dashboard` (product management, order queue)
+- **Admin**: Full system access including user management
+  - All employee permissions plus user role management
+  - Access to: `/admin` (user management, role assignment)
+  - Can promote users to employee/admin or demote to client
+
+**Initial Admin Setup:**
+- First user must be promoted to admin via SQL: `UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';`
+- After that, admins can manage all user roles through the `/admin` panel
+
 ### Database Schema
 
 **Core Tables:**
