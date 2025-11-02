@@ -25,8 +25,8 @@ export default function Admin() {
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
       toast({
-        title: "Unauthorized",
-        description: "You don't have access to this page",
+        title: "Não Autorizado",
+        description: "Você não tem acesso a esta página",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -46,16 +46,16 @@ export default function Admin() {
     },
     onSuccess: () => {
       toast({
-        title: "Role updated",
-        description: "User role has been changed successfully",
+        title: "Papel atualizado",
+        description: "Papel do usuário foi alterado com sucesso",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Não Autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -64,8 +64,8 @@ export default function Admin() {
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to update user role",
+        title: "Erro",
+        description: error.message || "Falha ao atualizar papel do usuário",
         variant: "destructive",
       });
     },
@@ -77,16 +77,16 @@ export default function Admin() {
     },
     onSuccess: () => {
       toast({
-        title: "User deleted",
-        description: "User has been removed from the system",
+        title: "Usuário excluído",
+        description: "Usuário foi removido do sistema",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Não Autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -95,8 +95,8 @@ export default function Admin() {
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete user",
+        title: "Erro",
+        description: error.message || "Falha ao excluir usuário",
         variant: "destructive",
       });
     },
@@ -136,7 +136,7 @@ export default function Admin() {
       
       <main className="container mx-auto px-4 py-12">
         <h1 className="font-serif text-4xl font-bold mb-8" data-testid="text-admin-title">
-          User Management
+          Gerenciamento de Usuários
         </h1>
 
         <div className="space-y-4">
@@ -167,10 +167,12 @@ export default function Admin() {
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge className={getRoleBadgeColor(userItem.role)} data-testid={`badge-user-role-${userItem.id}`}>
-                          {userItem.role}
+                          {userItem.role === "client" ? "Cliente" :
+                           userItem.role === "employee" ? "Funcionário" :
+                           userItem.role === "admin" ? "Administrador" : userItem.role}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
-                          Joined {new Date(userItem.createdAt).toLocaleDateString()}
+                          Entrou em {new Date(userItem.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -188,9 +190,9 @@ export default function Admin() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="client">Client</SelectItem>
-                        <SelectItem value="employee">Employee</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="client">Cliente</SelectItem>
+                        <SelectItem value="employee">Funcionário</SelectItem>
+                        <SelectItem value="admin">Administrador</SelectItem>
                       </SelectContent>
                     </Select>
 
@@ -200,7 +202,7 @@ export default function Admin() {
                       onClick={() => deleteUserMutation.mutate(userItem.id)}
                       disabled={deleteUserMutation.isPending || userItem.id === user?.id}
                       data-testid={`button-delete-user-${userItem.id}`}
-                      title={userItem.id === user?.id ? "Cannot delete your own account" : "Delete user"}
+                      title={userItem.id === user?.id ? "Não é possível excluir sua própria conta" : "Excluir usuário"}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -210,7 +212,7 @@ export default function Admin() {
             ))
           ) : (
             <p className="text-center text-muted-foreground py-8" data-testid="text-no-users">
-              No users found
+              Nenhum usuário encontrado
             </p>
           )}
         </div>

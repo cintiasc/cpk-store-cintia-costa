@@ -29,20 +29,20 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-6">
           <Link href="/products" data-testid="link-products">
             <span className={`text-sm font-medium transition-colors hover:text-primary ${location === '/products' ? 'text-foreground' : 'text-muted-foreground'}`}>
-              Products
+              Produtos
             </span>
           </Link>
           {user && (
             <Link href="/orders" data-testid="link-orders">
               <span className={`text-sm font-medium transition-colors hover:text-primary ${location === '/orders' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                My Orders
+                Meus Pedidos
               </span>
             </Link>
           )}
           {isEmployee && (
             <Link href="/dashboard" data-testid="link-dashboard">
               <span className={`text-sm font-medium transition-colors hover:text-primary ${location === '/dashboard' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Dashboard
+                Painel
               </span>
             </Link>
           )}
@@ -77,7 +77,7 @@ export function Header() {
                   {user.profileImageUrl ? (
                     <img 
                       src={user.profileImageUrl} 
-                      alt="Profile" 
+                      alt="Perfil" 
                       className="h-8 w-8 rounded-full object-cover"
                     />
                   ) : (
@@ -100,7 +100,7 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard" data-testid="menu-dashboard">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Dashboard
+                        Painel
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -109,14 +109,14 @@ export function Header() {
                 <DropdownMenuItem asChild>
                   <a href="/api/logout" data-testid="button-logout">
                     <LogOut className="mr-2 h-4 w-4" />
-                    Log Out
+                    Sair
                   </a>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button asChild data-testid="button-login">
-              <a href="/api/login">Log In</a>
+              <a href="/api/login">Entrar</a>
             </Button>
           )}
         </div>

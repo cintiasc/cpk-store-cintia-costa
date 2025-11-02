@@ -18,13 +18,13 @@ export default function Landing() {
         
         <div className="relative z-10 container mx-auto px-4 py-20 text-center">
           <h1 className="font-serif text-5xl md:text-7xl font-bold text-white mb-6" data-testid="text-hero-title">
-            Handcrafted Cupcakes,
+            Cupcakes Artesanais,
             <br />
-            Delivered Fresh
+            Entregues Fresquinhos
           </h1>
           <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Indulge in our premium cupcakes made with love and the finest ingredients.
-            Order online for delivery or pickup.
+            Delicie-se com nossos cupcakes premium feitos com amor e os melhores ingredientes.
+            Peça online para entrega ou retirada.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -33,7 +33,7 @@ export default function Landing() {
               className="text-lg px-8 backdrop-blur-md bg-white/90 text-foreground hover:bg-white"
               data-testid="button-hero-login"
             >
-              <a href="/api/login">Get Started</a>
+              <a href="/api/login">Começar</a>
             </Button>
             <Button 
               asChild 
@@ -42,7 +42,7 @@ export default function Landing() {
               className="text-lg px-8 backdrop-blur-md bg-white/10 text-white border-white/30 hover:bg-white/20"
               data-testid="button-hero-learn-more"
             >
-              <a href="#features">Learn More</a>
+              <a href="#features">Saiba Mais</a>
             </Button>
           </div>
         </div>
@@ -52,7 +52,7 @@ export default function Landing() {
       <section id="features" className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <h2 className="font-serif text-4xl font-bold text-center mb-12">
-            Why Choose Us
+            Por Que Escolher a Gente
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -61,10 +61,10 @@ export default function Landing() {
                 <ShoppingBag className="h-8 w-8 text-primary" />
               </div>
               <h3 className="font-serif text-xl font-semibold mb-2">
-                Premium Quality
+                Qualidade Premium
               </h3>
               <p className="text-muted-foreground">
-                Every cupcake is handcrafted with premium ingredients and attention to detail
+                Cada cupcake é feito artesanalmente com ingredientes premium e atenção aos detalhes
               </p>
             </div>
 
@@ -73,10 +73,10 @@ export default function Landing() {
                 <Truck className="h-8 w-8 text-primary" />
               </div>
               <h3 className="font-serif text-xl font-semibold mb-2">
-                Fast Delivery
+                Entrega Rápida
               </h3>
               <p className="text-muted-foreground">
-                Fresh cupcakes delivered to your door, or ready for pickup within hours
+                Cupcakes frescos entregues na sua porta, ou prontos para retirada em poucas horas
               </p>
             </div>
 
@@ -85,10 +85,10 @@ export default function Landing() {
                 <Star className="h-8 w-8 text-primary" />
               </div>
               <h3 className="font-serif text-xl font-semibold mb-2">
-                Customer Favorite
+                Favorito dos Clientes
               </h3>
               <p className="text-muted-foreground">
-                Loved by thousands of customers for our unique flavors and beautiful designs
+                Amado por milhares de clientes pelos nossos sabores únicos e designs lindos
               </p>
             </div>
           </div>
@@ -99,13 +99,13 @@ export default function Landing() {
       <section className="py-20 bg-primary/5">
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-serif text-4xl font-bold mb-4">
-            Ready to indulge?
+            Pronto para se deliciar?
           </h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Sign in to browse our delicious selection and place your first order
+            Entre para navegar pela nossa deliciosa seleção e fazer seu primeiro pedido
           </p>
           <Button asChild size="lg" className="text-lg px-8" data-testid="button-cta-login">
-            <a href="/api/login">Sign In to Order</a>
+            <a href="/api/login">Entrar para Pedir</a>
           </Button>
         </div>
       </section>
@@ -113,9 +113,9 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2024 Cupcake Store. All rights reserved.</p>
+          <p>© 2024 Cupcake Store. Todos os direitos reservados.</p>
           <p className="mt-2">
-            By using our service, you agree to our Terms of Service and Privacy Policy (LGPD compliant)
+            Ao usar nosso serviço, você concorda com nossos Termos de Serviço e Política de Privacidade (em conformidade com a LGPD)
           </p>
         </div>
       </footer>

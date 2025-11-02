@@ -33,13 +33,13 @@ export default function Home() {
           
           <div className="relative z-10 container mx-auto px-4 py-20 text-center">
             <h1 className="font-serif text-4xl md:text-6xl font-bold text-white mb-4" data-testid="text-home-hero-title">
-              Welcome back, {user?.firstName}!
+              Bem-vindo de volta, {user?.firstName}!
             </h1>
             <p className="text-lg md:text-xl text-white/90 mb-6 max-w-2xl mx-auto">
-              Explore our delicious selection of handcrafted cupcakes
+              Explore nossa deliciosa seleção de cupcakes artesanais
             </p>
             <Button asChild size="lg" className="backdrop-blur-md bg-white/90 text-foreground hover:bg-white" data-testid="button-hero-shop">
-              <Link href="/products">Shop Now</Link>
+              <Link href="/products">Comprar Agora</Link>
             </Button>
           </div>
         </section>
@@ -48,9 +48,9 @@ export default function Home() {
         {featuredProducts.length > 0 && (
           <section className="container mx-auto px-4 py-16">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="font-serif text-3xl font-bold">Featured Cupcakes</h2>
+              <h2 className="font-serif text-3xl font-bold">Cupcakes em Destaque</h2>
               <Button asChild variant="outline" data-testid="button-view-all">
-                <Link href="/products">View All</Link>
+                <Link href="/products">Ver Todos</Link>
               </Button>
             </div>
             
@@ -68,18 +68,18 @@ export default function Home() {
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <Link href="/orders">
                 <div className="bg-background rounded-xl p-8 hover:shadow-lg transition-shadow" data-testid="card-orders-link">
-                  <h3 className="font-serif text-2xl font-semibold mb-2">Your Orders</h3>
+                  <h3 className="font-serif text-2xl font-semibold mb-2">Seus Pedidos</h3>
                   <p className="text-muted-foreground">
-                    View your order history and track deliveries
+                    Veja seu histórico de pedidos e rastreie entregas
                   </p>
                 </div>
               </Link>
               
               <Link href="/products">
                 <div className="bg-background rounded-xl p-8 hover:shadow-lg transition-shadow" data-testid="card-browse-link">
-                  <h3 className="font-serif text-2xl font-semibold mb-2">Browse All</h3>
+                  <h3 className="font-serif text-2xl font-semibold mb-2">Ver Todos</h3>
                   <p className="text-muted-foreground">
-                    Discover our complete cupcake collection
+                    Descubra nossa coleção completa de cupcakes
                   </p>
                 </div>
               </Link>

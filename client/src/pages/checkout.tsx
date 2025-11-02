@@ -9,6 +9,7 @@ import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
+import { formatCurrency } from "@/lib/formatters";
 
 export default function Checkout() {
   const { user, isLoading: authLoading } = useAuth();
@@ -19,8 +20,8 @@ export default function Checkout() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        title: "Não autorizado",
+        description: "Você foi desconectado. Fazendo login novamente...",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -45,16 +46,16 @@ export default function Checkout() {
     onSuccess: () => {
       clearCart();
       toast({
-        title: "Order placed successfully!",
-        description: "Your order has been received and is being prepared.",
+        title: "Pedido realizado com sucesso!",
+        description: "Seu pedido foi recebido e está sendo preparado.",
       });
       setLocation("/orders");
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Não autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -63,8 +64,8 @@ export default function Checkout() {
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to place order",
+        title: "Erro",
+        description: error.message || "Falha ao realizar pedido",
         variant: "destructive",
       });
     },
@@ -88,13 +89,13 @@ export default function Checkout() {
         <main className="container mx-auto px-4 py-12">
           <div className="text-center py-20">
             <h1 className="font-serif text-4xl font-bold mb-4">
-              Your Cart is Empty
+              Seu Carrinho está Vazio
             </h1>
             <p className="text-muted-foreground text-lg mb-8">
-              Add some cupcakes to your cart before checking out
+              Adicione alguns cupcakes ao seu carrinho antes de finalizar a compra
             </p>
             <Button asChild size="lg">
-              <a href="/products">Browse Products</a>
+              <a href="/products">Ver Produtos</a>
             </Button>
           </div>
         </main>
@@ -108,12 +109,12 @@ export default function Checkout() {
       
       <main className="container mx-auto px-4 py-12">
         <h1 className="font-serif text-4xl font-bold mb-8" data-testid="text-checkout-title">
-          Checkout
+          Finalizar Compra
         </h1>
 
         <div className="max-w-3xl mx-auto">
           <Card className="p-8 mb-6">
-            <h2 className="font-serif text-2xl font-semibold mb-6">Order Summary</h2>
+            <h2 className="font-serif text-2xl font-semibold mb-6">Resumo do Pedido</h2>
             
             <div className="space-y-4 mb-6">
               {items.map((item) => (
@@ -121,11 +122,11 @@ export default function Checkout() {
                   <div>
                     <p className="font-medium">{item.product.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      Quantity: {item.quantity} × ${parseFloat(item.product.price).toFixed(2)}
+                      Quantidade: {item.quantity} × {formatCurrency(item.product.price)}
                     </p>
                   </div>
                   <p className="font-semibold">
-                    ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                    {formatCurrency(parseFloat(item.product.price) * item.quantity)}
                   </p>
                 </div>
               ))}
@@ -135,27 +136,27 @@ export default function Checkout() {
               <div className="flex justify-between text-lg">
                 <span className="font-medium">Subtotal</span>
                 <span data-testid="text-checkout-subtotal">
-                  ${getTotalAmount().toFixed(2)}
+                  {formatCurrency(getTotalAmount())}
                 </span>
               </div>
               <div className="flex justify-between text-lg">
-                <span className="font-medium">Delivery</span>
-                <span className="text-muted-foreground">Free</span>
+                <span className="font-medium">Entrega</span>
+                <span className="text-muted-foreground">Grátis</span>
               </div>
               <div className="flex justify-between font-serif text-2xl font-bold pt-2">
                 <span>Total</span>
                 <span data-testid="text-checkout-total">
-                  ${getTotalAmount().toFixed(2)}
+                  {formatCurrency(getTotalAmount())}
                 </span>
               </div>
             </div>
           </Card>
 
           <Card className="p-8">
-            <h2 className="font-serif text-2xl font-semibold mb-4">Delivery Information</h2>
+            <h2 className="font-serif text-2xl font-semibold mb-4">Informações de Entrega</h2>
             <div className="space-y-2 mb-6">
               <p className="text-muted-foreground">
-                <span className="font-medium text-foreground">Name:</span>{" "}
+                <span className="font-medium text-foreground">Nome:</span>{" "}
                 {user?.firstName} {user?.lastName}
               </p>
               <p className="text-muted-foreground">
@@ -166,8 +167,8 @@ export default function Checkout() {
 
             <div className="border-t pt-6">
               <p className="text-sm text-muted-foreground mb-6">
-                By placing this order, you agree to our Terms of Service and Privacy Policy.
-                Your order will be prepared fresh and delivered within 24 hours.
+                Ao realizar este pedido, você concorda com nossos Termos de Serviço e Política de Privacidade.
+                Seu pedido será preparado fresquinho e entregue em até 24 horas.
               </p>
 
               <Button
@@ -177,7 +178,7 @@ export default function Checkout() {
                 disabled={orderMutation.isPending}
                 data-testid="button-place-order"
               >
-                {orderMutation.isPending ? "Placing Order..." : "Place Order"}
+                {orderMutation.isPending ? "Realizando Pedido..." : "Realizar Pedido"}
               </Button>
             </div>
           </Card>

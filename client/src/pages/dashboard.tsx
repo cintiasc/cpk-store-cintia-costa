@@ -32,6 +32,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertProductSchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { z } from "zod";
+import { formatCurrency } from "@/lib/formatters";
 
 type ProductFormData = z.infer<typeof insertProductSchema>;
 
@@ -44,8 +45,8 @@ export default function Dashboard() {
   useEffect(() => {
     if (!authLoading && (!user || !isEmployee)) {
       toast({
-        title: "Unauthorized",
-        description: "You don't have access to this page",
+        title: "Não Autorizado",
+        description: "Você não tem acesso a esta página",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -84,8 +85,8 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       toast({
-        title: editingProduct ? "Product updated" : "Product created",
-        description: "Changes saved successfully",
+        title: editingProduct ? "Produto atualizado" : "Produto criado",
+        description: "Alterações salvas com sucesso",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setProductDialogOpen(false);
@@ -95,8 +96,8 @@ export default function Dashboard() {
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Não Autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -105,8 +106,8 @@ export default function Dashboard() {
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to save product",
+        title: "Erro",
+        description: error.message || "Falha ao salvar produto",
         variant: "destructive",
       });
     },
@@ -118,16 +119,16 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       toast({
-        title: "Product deleted",
-        description: "Product has been removed",
+        title: "Produto excluído",
+        description: "Produto foi removido",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Não Autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -136,8 +137,8 @@ export default function Dashboard() {
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete product",
+        title: "Erro",
+        description: error.message || "Falha ao excluir produto",
         variant: "destructive",
       });
     },
@@ -149,16 +150,16 @@ export default function Dashboard() {
     },
     onSuccess: () => {
       toast({
-        title: "Order updated",
-        description: "Order status has been changed",
+        title: "Pedido atualizado",
+        description: "Status do pedido foi alterado",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/orders"] });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Não Autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -167,8 +168,8 @@ export default function Dashboard() {
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to update order",
+        title: "Erro",
+        description: error.message || "Falha ao atualizar pedido",
         variant: "destructive",
       });
     },
@@ -232,24 +233,24 @@ export default function Dashboard() {
       
       <main className="container mx-auto px-4 py-12">
         <h1 className="font-serif text-4xl font-bold mb-8" data-testid="text-dashboard-title">
-          Employee Dashboard
+          Painel do Funcionário
         </h1>
 
         {/* Products Section */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-serif text-2xl font-semibold">Products</h2>
+            <h2 className="font-serif text-2xl font-semibold">Produtos</h2>
             <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={handleNewProduct} data-testid="button-add-product">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Product
+                  Adicionar Produto
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingProduct ? "Edit Product" : "Add New Product"}
+                    {editingProduct ? "Editar Produto" : "Adicionar Novo Produto"}
                   </DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
@@ -259,7 +260,7 @@ export default function Dashboard() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Name</FormLabel>
+                          <FormLabel>Nome</FormLabel>
                           <FormControl>
                             <Input {...field} data-testid="input-product-name" />
                           </FormControl>
@@ -272,7 +273,7 @@ export default function Dashboard() {
                       name="description"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Description</FormLabel>
+                          <FormLabel>Descrição</FormLabel>
                           <FormControl>
                             <Textarea {...field} data-testid="input-product-description" />
                           </FormControl>
@@ -285,7 +286,7 @@ export default function Dashboard() {
                       name="price"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Price</FormLabel>
+                          <FormLabel>Preço</FormLabel>
                           <FormControl>
                             <Input {...field} type="number" step="0.01" data-testid="input-product-price" />
                           </FormControl>
@@ -298,7 +299,7 @@ export default function Dashboard() {
                       name="imageUrl"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Image URL</FormLabel>
+                          <FormLabel>URL da Imagem</FormLabel>
                           <FormControl>
                             <Input {...field} data-testid="input-product-image-url" />
                           </FormControl>
@@ -313,10 +314,10 @@ export default function Dashboard() {
                         onClick={() => setProductDialogOpen(false)}
                         data-testid="button-cancel-product"
                       >
-                        Cancel
+                        Cancelar
                       </Button>
                       <Button type="submit" disabled={productMutation.isPending} data-testid="button-save-product">
-                        {productMutation.isPending ? "Saving..." : "Save Product"}
+                        {productMutation.isPending ? "Salvando..." : "Salvar Produto"}
                       </Button>
                     </div>
                   </form>
@@ -339,13 +340,13 @@ export default function Dashboard() {
                         />
                       ) : (
                         <div className="flex h-full items-center justify-center text-muted-foreground text-xs">
-                          No image
+                          Sem imagem
                         </div>
                       )}
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold mb-1">{product.name}</h3>
-                      <p className="font-serif text-lg font-bold">${parseFloat(product.price).toFixed(2)}</p>
+                      <p className="font-serif text-lg font-bold">{formatCurrency(product.price)}</p>
                       <div className="flex gap-2 mt-2">
                         <Button
                           variant="outline"
@@ -371,7 +372,7 @@ export default function Dashboard() {
               ))
             ) : (
               <p className="text-muted-foreground col-span-full text-center py-8" data-testid="text-no-products">
-                No products yet. Add your first product!
+                Nenhum produto ainda. Adicione seu primeiro produto!
               </p>
             )}
           </div>
@@ -379,7 +380,7 @@ export default function Dashboard() {
 
         {/* Orders Queue Section */}
         <section>
-          <h2 className="font-serif text-2xl font-semibold mb-6">Order Queue</h2>
+          <h2 className="font-serif text-2xl font-semibold mb-6">Fila de Pedidos</h2>
           <div className="space-y-4">
             {ordersLoading ? (
               [...Array(3)].map((_, i) => (
@@ -392,18 +393,21 @@ export default function Dashboard() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-serif text-lg font-semibold">
-                          Order #{order.id}
+                          Pedido #{order.id}
                         </h3>
                         <Badge className={getStatusColor(order.status)}>
-                          {order.status.replace("_", " ")}
+                          {order.status === "pending" ? "Pendente" :
+                           order.status === "in_preparation" ? "Em Preparação" :
+                           order.status === "ready_for_delivery" ? "Pronto para Entrega" :
+                           order.status === "delivered" ? "Entregue" : order.status}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">
-                        Customer: {order.user.firstName} {order.user.lastName}
+                        Cliente: {order.user.firstName} {order.user.lastName}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {order.items.length} item{order.items.length !== 1 ? 's' : ''} • 
-                        ${parseFloat(order.totalAmount).toFixed(2)} • 
+                        {order.items.length} {order.items.length !== 1 ? 'itens' : 'item'} • 
+                        {formatCurrency(order.totalAmount)} • 
                         {new Date(order.createdAt).toLocaleString()}
                       </p>
                     </div>
@@ -418,10 +422,10 @@ export default function Dashboard() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="in_preparation">In Preparation</SelectItem>
-                          <SelectItem value="ready_for_delivery">Ready for Delivery</SelectItem>
-                          <SelectItem value="delivered">Delivered</SelectItem>
+                          <SelectItem value="pending">Pendente</SelectItem>
+                          <SelectItem value="in_preparation">Em Preparação</SelectItem>
+                          <SelectItem value="ready_for_delivery">Pronto para Entrega</SelectItem>
+                          <SelectItem value="delivered">Entregue</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -430,7 +434,7 @@ export default function Dashboard() {
               ))
             ) : (
               <p className="text-muted-foreground text-center py-8" data-testid="text-no-orders">
-                No orders in the queue
+                Nenhum pedido na fila
               </p>
             )}
           </div>

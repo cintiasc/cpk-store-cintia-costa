@@ -15,10 +15,10 @@ export default function Products() {
       <main className="container mx-auto px-4 py-12">
         <div className="mb-8">
           <h1 className="font-serif text-4xl font-bold mb-2" data-testid="text-page-title">
-            Our Cupcakes
+            Nossos Cupcakes
           </h1>
           <p className="text-muted-foreground text-lg">
-            Discover our delicious handcrafted cupcakes
+            Descubra nossos deliciosos cupcakes artesanais
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export default function Products() {
         ) : (
           <div className="text-center py-20">
             <p className="text-muted-foreground text-lg" data-testid="text-no-products">
-              No products available at the moment.
+              Nenhum produto disponível no momento.
             </p>
           </div>
         )}

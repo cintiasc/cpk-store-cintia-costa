@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import type { ProductWithRating } from "@shared/schema";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/lib/formatters";
 
 interface ProductCardProps {
   product: ProductWithRating;
@@ -18,8 +19,8 @@ export function ProductCard({ product }: ProductCardProps) {
     e.preventDefault();
     addItem(product, 1);
     toast({
-      title: "Added to cart",
-      description: `${product.name} has been added to your cart`,
+      title: "Adicionado ao carrinho",
+      description: `${product.name} foi adicionado ao seu carrinho`,
     });
   };
 
@@ -42,7 +43,7 @@ export function ProductCard({ product }: ProductCardProps) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-              No image
+              Sem imagem
             </div>
           )}
         </div>
@@ -62,7 +63,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center gap-1">
             <Star className="h-4 w-4 fill-primary text-primary" />
             <span className="text-sm font-medium" data-testid={`text-rating-${product.id}`}>
-              {averageRating > 0 ? averageRating.toFixed(1) : "New"}
+              {averageRating > 0 ? averageRating.toFixed(1) : "Novo"}
             </span>
             {reviewCount > 0 && (
               <span className="text-sm text-muted-foreground">
@@ -73,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
           <div className="flex items-center justify-between gap-2">
             <p className="font-serif text-2xl font-bold" data-testid={`text-price-${product.id}`}>
-              ${parseFloat(product.price).toFixed(2)}
+              {formatCurrency(product.price)}
             </p>
             <Button 
               size="icon" 

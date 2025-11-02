@@ -11,6 +11,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { OrderWithItems } from "@shared/schema";
 import { RotateCcw } from "lucide-react";
+import { formatCurrency } from "@/lib/formatters";
 
 export default function Orders() {
   const { user, isLoading: authLoading } = useAuth();
@@ -21,8 +22,8 @@ export default function Orders() {
   useEffect(() => {
     if (!authLoading && !user) {
       toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        title: "Não autorizado",
+        description: "Você foi desconectado. Fazendo login novamente...",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -46,15 +47,15 @@ export default function Orders() {
         addItem(item.product, item.quantity);
       });
       toast({
-        title: "Order repeated",
-        description: "Items have been added to your cart",
+        title: "Pedido repetido",
+        description: "Itens foram adicionados ao seu carrinho",
       });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Não autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -63,8 +64,8 @@ export default function Orders() {
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to repeat order",
+        title: "Erro",
+        description: error.message || "Falha ao repetir pedido",
         variant: "destructive",
       });
     },
@@ -88,13 +89,13 @@ export default function Orders() {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "pending":
-        return "Pending";
+        return "Pendente";
       case "in_preparation":
-        return "In Preparation";
+        return "Em Preparação";
       case "ready_for_delivery":
-        return "Ready for Delivery";
+        return "Pronto para Entrega";
       case "delivered":
-        return "Delivered";
+        return "Entregue";
       default:
         return status;
     }
@@ -121,7 +122,7 @@ export default function Orders() {
       
       <main className="container mx-auto px-4 py-12">
         <h1 className="font-serif text-4xl font-bold mb-8" data-testid="text-orders-title">
-          My Orders
+          Meus Pedidos
         </h1>
 
         {orders && orders.length > 0 ? (
@@ -132,20 +133,20 @@ export default function Orders() {
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-serif text-xl font-semibold" data-testid={`text-order-number-${order.id}`}>
-                        Order #{order.id}
+                        Pedido #{order.id}
                       </h3>
                       <Badge className={getStatusColor(order.status)} data-testid={`badge-status-${order.id}`}>
                         {getStatusLabel(order.status)}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Placed on {new Date(order.createdAt).toLocaleDateString()} at{" "}
+                      Realizado em {new Date(order.createdAt).toLocaleDateString()} às{" "}
                       {new Date(order.createdAt).toLocaleTimeString()}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <p className="font-serif text-2xl font-bold" data-testid={`text-order-total-${order.id}`}>
-                      ${parseFloat(order.totalAmount).toFixed(2)}
+                      {formatCurrency(order.totalAmount)}
                     </p>
                     <Button
                       variant="outline"
@@ -153,7 +154,7 @@ export default function Orders() {
                       onClick={() => repeatOrderMutation.mutate(order.id)}
                       disabled={repeatOrderMutation.isPending}
                       data-testid={`button-repeat-order-${order.id}`}
-                      title="Repeat Order"
+                      title="Repetir Pedido"
                     >
                       <RotateCcw className="h-4 w-4" />
                     </Button>
@@ -176,18 +177,18 @@ export default function Orders() {
                           />
                         ) : (
                           <div className="flex h-full items-center justify-center text-muted-foreground text-xs">
-                            No image
+                            Sem imagem
                           </div>
                         )}
                       </div>
                       <div className="flex-1">
                         <p className="font-medium">{item.product.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          Quantity: {item.quantity} × ${parseFloat(item.priceAtPurchase).toFixed(2)}
+                          Quantidade: {item.quantity} × {formatCurrency(item.priceAtPurchase)}
                         </p>
                       </div>
                       <p className="font-semibold">
-                        ${(parseFloat(item.priceAtPurchase) * item.quantity).toFixed(2)}
+                        {formatCurrency(parseFloat(item.priceAtPurchase) * item.quantity)}
                       </p>
                     </div>
                   ))}
@@ -198,10 +199,10 @@ export default function Orders() {
         ) : (
           <div className="text-center py-20">
             <p className="text-muted-foreground text-lg mb-8" data-testid="text-no-orders">
-              You haven't placed any orders yet.
+              Você ainda não fez nenhum pedido.
             </p>
             <Button asChild size="lg" data-testid="button-browse-products">
-              <a href="/products">Browse Products</a>
+              <a href="/products">Ver Produtos</a>
             </Button>
           </div>
         )}

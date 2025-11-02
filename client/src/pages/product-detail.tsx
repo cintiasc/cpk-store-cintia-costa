@@ -13,6 +13,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { ProductWithRating, ReviewWithUser } from "@shared/schema";
 import { useState } from "react";
+import { formatCurrency } from "@/lib/formatters";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/products/:id");
@@ -45,8 +46,8 @@ export default function ProductDetail() {
     },
     onSuccess: () => {
       toast({
-        title: "Review submitted",
-        description: "Thank you for your feedback!",
+        title: "Avaliação enviada",
+        description: "Obrigado pelo seu feedback!",
       });
       setRating(0);
       setComment("");
@@ -57,8 +58,8 @@ export default function ProductDetail() {
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
+          title: "Não autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
           variant: "destructive",
         });
         setTimeout(() => {
@@ -67,8 +68,8 @@ export default function ProductDetail() {
         return;
       }
       toast({
-        title: "Error",
-        description: error.message || "Failed to submit review",
+        title: "Erro",
+        description: error.message || "Falha ao enviar avaliação",
         variant: "destructive",
       });
     },
@@ -78,8 +79,8 @@ export default function ProductDetail() {
     if (product) {
       addItem(product, quantity);
       toast({
-        title: "Added to cart",
-        description: `${quantity} ${product.name}${quantity > 1 ? 's' : ''} added to your cart`,
+        title: "Adicionado ao carrinho",
+        description: `${quantity} ${product.name}${quantity > 1 ? 's' : ''} adicionado ao seu carrinho`,
       });
     }
   };
@@ -88,8 +89,8 @@ export default function ProductDetail() {
     e.preventDefault();
     if (rating === 0) {
       toast({
-        title: "Rating required",
-        description: "Please select a rating",
+        title: "Avaliação obrigatória",
+        description: "Por favor, selecione uma avaliação",
         variant: "destructive",
       });
       return;
@@ -113,7 +114,7 @@ export default function ProductDetail() {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-12 text-center">
-          <p className="text-muted-foreground" data-testid="text-not-found">Product not found</p>
+          <p className="text-muted-foreground" data-testid="text-not-found">Produto não encontrado</p>
         </div>
       </div>
     );
@@ -136,7 +137,7 @@ export default function ProductDetail() {
               />
             ) : (
               <div className="flex h-full items-center justify-center text-muted-foreground">
-                No image
+                Sem imagem
               </div>
             )}
           </div>
@@ -151,12 +152,12 @@ export default function ProductDetail() {
                 <div className="flex items-center gap-1">
                   <Star className="h-5 w-5 fill-primary text-primary" />
                   <span className="font-medium" data-testid="text-average-rating">
-                    {product.averageRating ? product.averageRating.toFixed(1) : "New"}
+                    {product.averageRating ? product.averageRating.toFixed(1) : "Novo"}
                   </span>
                 </div>
                 {product.reviewCount && product.reviewCount > 0 && (
                   <span className="text-muted-foreground">
-                    ({product.reviewCount} {product.reviewCount === 1 ? 'review' : 'reviews'})
+                    ({product.reviewCount} {product.reviewCount === 1 ? 'avaliação' : 'avaliações'})
                   </span>
                 )}
               </div>
@@ -170,7 +171,7 @@ export default function ProductDetail() {
 
             <div className="border-t pt-6">
               <p className="font-serif text-4xl font-bold mb-6" data-testid="text-product-price">
-                ${parseFloat(product.price).toFixed(2)}
+                {formatCurrency(product.price)}
               </p>
 
               <div className="flex items-center gap-4 mb-6">
@@ -201,7 +202,7 @@ export default function ProductDetail() {
                   onClick={handleAddToCart}
                   data-testid="button-add-to-cart-detail"
                 >
-                  Add to Cart
+                  Adicionar ao Carrinho
                 </Button>
               </div>
             </div>
@@ -210,15 +211,15 @@ export default function ProductDetail() {
 
         {/* Reviews Section */}
         <div className="mt-16">
-          <h2 className="font-serif text-3xl font-bold mb-8">Customer Reviews</h2>
+          <h2 className="font-serif text-3xl font-bold mb-8">Avaliações</h2>
 
           {/* Review Form */}
           {user && canReview?.canReview && (
             <Card className="p-6 mb-8">
-              <h3 className="font-semibold text-lg mb-4">Write a Review</h3>
+              <h3 className="font-semibold text-lg mb-4">Escrever uma Avaliação</h3>
               <form onSubmit={handleSubmitReview} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Rating</label>
+                  <label className="block text-sm font-medium mb-2">Sua Avaliação</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -242,13 +243,13 @@ export default function ProductDetail() {
 
                 <div>
                   <label htmlFor="comment" className="block text-sm font-medium mb-2">
-                    Comment (optional)
+                    Comentário (opcional)
                   </label>
                   <Textarea
                     id="comment"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="Share your thoughts about this cupcake..."
+                    placeholder="Compartilhe sua opinião sobre este cupcake..."
                     className="min-h-24"
                     data-testid="input-review-comment"
                   />
@@ -259,7 +260,7 @@ export default function ProductDetail() {
                   disabled={reviewMutation.isPending}
                   data-testid="button-submit-review"
                 >
-                  {reviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                  {reviewMutation.isPending ? "Enviando..." : "Enviar Avaliação"}
                 </Button>
               </form>
             </Card>
@@ -301,7 +302,7 @@ export default function ProductDetail() {
               ))
             ) : (
               <p className="text-center text-muted-foreground py-8" data-testid="text-no-reviews">
-                No reviews yet. Be the first to review this product!
+                Nenhuma avaliação ainda. Seja o primeiro a avaliar este produto!
               </p>
             )}
           </div>

@@ -4,6 +4,7 @@ import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCart } from "@/hooks/useCart";
+import { formatCurrency } from "@/lib/formatters";
 
 export default function Cart() {
   const { items, updateQuantity, removeItem, getTotalAmount } = useCart();
@@ -15,13 +16,13 @@ export default function Cart() {
         <main className="container mx-auto px-4 py-12">
           <div className="text-center py-20">
             <h1 className="font-serif text-4xl font-bold mb-4" data-testid="text-empty-cart-title">
-              Your Cart is Empty
+              Seu Carrinho está Vazio
             </h1>
             <p className="text-muted-foreground text-lg mb-8">
-              Add some delicious cupcakes to get started!
+              Adicione alguns cupcakes deliciosos para começar!
             </p>
             <Button asChild size="lg" data-testid="button-browse-products">
-              <Link href="/products">Browse Products</Link>
+              <Link href="/products">Ver Produtos</Link>
             </Button>
           </div>
         </main>
@@ -35,7 +36,7 @@ export default function Cart() {
       
       <main className="container mx-auto px-4 py-12">
         <h1 className="font-serif text-4xl font-bold mb-8" data-testid="text-cart-title">
-          Shopping Cart
+          Carrinho de Compras
         </h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -53,7 +54,7 @@ export default function Cart() {
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-muted-foreground text-xs">
-                        No image
+                        Sem imagem
                       </div>
                     )}
                   </div>
@@ -67,7 +68,7 @@ export default function Cart() {
                           </h3>
                         </Link>
                         <p className="text-muted-foreground" data-testid={`text-cart-item-price-${item.product.id}`}>
-                          ${parseFloat(item.product.price).toFixed(2)} each
+                          {formatCurrency(item.product.price)} cada
                         </p>
                       </div>
                       <Button
@@ -101,7 +102,7 @@ export default function Cart() {
                         <Plus className="h-4 w-4" />
                       </Button>
                       <span className="ml-auto font-serif text-xl font-bold" data-testid={`text-item-total-${item.product.id}`}>
-                        ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                        {formatCurrency(parseFloat(item.product.price) * item.quantity)}
                       </span>
                     </div>
                   </div>
@@ -113,18 +114,18 @@ export default function Cart() {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <Card className="p-6 sticky top-20">
-              <h2 className="font-serif text-2xl font-bold mb-6">Order Summary</h2>
+              <h2 className="font-serif text-2xl font-bold mb-6">Resumo do Pedido</h2>
               
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
                   <span data-testid="text-subtotal">
-                    ${getTotalAmount().toFixed(2)}
+                    {formatCurrency(getTotalAmount())}
                   </span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
-                  <span>Delivery</span>
-                  <span>Calculated at checkout</span>
+                  <span>Entrega</span>
+                  <span>Calculado no checkout</span>
                 </div>
               </div>
 
@@ -132,17 +133,17 @@ export default function Cart() {
                 <div className="flex justify-between font-serif text-2xl font-bold">
                   <span>Total</span>
                   <span data-testid="text-total">
-                    ${getTotalAmount().toFixed(2)}
+                    {formatCurrency(getTotalAmount())}
                   </span>
                 </div>
               </div>
 
               <Button asChild className="w-full" size="lg" data-testid="button-checkout">
-                <Link href="/checkout">Proceed to Checkout</Link>
+                <Link href="/checkout">Finalizar Compra</Link>
               </Button>
 
               <Button asChild variant="outline" className="w-full mt-2" data-testid="button-continue-shopping">
-                <Link href="/products">Continue Shopping</Link>
+                <Link href="/products">Continuar Comprando</Link>
               </Button>
             </Card>
           </div>
