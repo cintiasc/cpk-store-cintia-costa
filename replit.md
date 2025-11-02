@@ -6,6 +6,15 @@ This is a full-stack e-commerce web application for selling cupcakes online. The
 
 The system provides core e-commerce functionality including product browsing, shopping cart management, order processing, product reviews, and administrative dashboards for product and order management.
 
+## Recent Changes
+
+**November 2, 2025:**
+- ✅ **Enhanced Pre-registration System**: Admins can now specify optional firstName and lastName when pre-registering users. Names are automatically applied on first login if Replit profile lacks them.
+- ✅ **Bug Fix: Repeat Order**: Fixed TypeError where mutation wasn't parsing response as JSON. Added `.json()` call.
+- ✅ **Bug Fix: Order Status Updates**: Fixed cache invalidation to update both Dashboard (`/api/dashboard/orders`) and Client Orders (`/api/orders`) simultaneously.
+- ✅ **Authentication Flow**: Corrected upsertUser operation order to insert user before applying preassigned role, ensuring first-login promotion works correctly.
+- ✅ **LGPD Compliance**: Fixed lgpdAccepted timestamp preservation across logins (no longer resets on subsequent logins).
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -77,10 +86,13 @@ Preferred communication style: Simple, everyday language.
 **Initial Admin Setup:**
 - First user must be promoted to admin via SQL: `UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';`
 - After that, admins can manage all user roles through the `/admin` panel
-- **Pre-registration system**: Admins can pre-assign roles to users by email before their first login
+- **Pre-registration system**: Admins can pre-assign roles AND names to users by email before their first login
+  - Supports optional firstName and lastName in preassignment
+  - If Replit profile lacks names, preassigned names are automatically applied on first login
   - New users automatically receive pre-assigned role during authentication
   - Pre-assigned roles are marked as consumed after first login
   - Supports employee and admin role pre-assignment for controlled access
+  - Password is always managed via Replit Auth (OIDC), never stored locally
 
 **Password Recovery:**
 - Password recovery is managed through Replit Auth (OIDC provider)
@@ -96,7 +108,7 @@ Preferred communication style: Simple, everyday language.
 4. **orderItems**: Individual line items within orders with price snapshot at purchase
 5. **reviews**: Product reviews with ratings (1-5) and comments, linked to verified purchases
 6. **sessions**: Session storage for authentication (required by Replit Auth)
-7. **preassigned_roles**: Pre-assigned roles for users before first login (email, role, createdBy, consumed)
+7. **preassigned_roles**: Pre-assigned roles for users before first login (email, firstName, lastName, role, createdBy, consumed)
 
 **Key Relationships:**
 - Users → Orders (one-to-many)
