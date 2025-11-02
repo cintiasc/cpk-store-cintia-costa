@@ -1,0 +1,143 @@
+Com certeza. Para que uma IA (especialmente uma focada em geração de código ou planejamento de projeto) entenda perfeitamente seus requisitos, é melhor estruturá-los de forma lógica, separando papéis, funcionalidades e o modelo de dados.
+
+Aqui está o seu texto, reestruturado como um prompt detalhado e claro:
+
+🤖 Prompt para IA: Criação de E-commerce de Cupcakes
+Objetivo Principal: Criar um site de e-commerce completo para a venda de cupcakes, hospedado no Google Cloud, com um banco de dados SQL.
+
+O site deve ser dividido em três níveis de permissão (visões): Cliente, Funcionário e Administrador.
+
+1. Funcionalidades Globais (Comuns a Todos)
+Autenticação:
+
+Sistema de Login (requer e-mail e senha corretos).
+
+Sistema de Cadastro de Novo Usuário.
+
+Campos de Cadastro de Usuário:
+
+Nome de usuário (nome)
+
+E-mail (deve ser único)
+
+Senha (deve ser armazenada com hash)
+
+Checkbox de "Aceite dos termos da LGPD" (obrigatório)
+
+2. Visão e Funcionalidades do Cliente
+Navegação: Visualizar todos os produtos (vitrine) com fotos, descrição e avaliação média.
+
+Carrinho de Compras:
+
+Adicionar produtos ao carrinho.
+
+Remover produtos do carrinho.
+
+Ajustar quantidade de produtos no carrinho.
+
+Checkout: Finalizar a compra (detalhes de pagamento e entrega).
+
+Pós-Compra:
+
+Visualizar histórico de pedidos.
+
+Repetir um pedido já efetuado.
+
+Avaliar produtos (somente após a confirmação da compra de um item).
+
+3. Visão e Funcionalidades do Funcionário
+Gerenciamento de Produtos (CRUD):
+
+Cadastrar novos produtos.
+
+Editar informações de produtos existentes.
+
+Excluir produtos.
+
+Gerenciamento de Pedidos:
+
+Verificar a fila de pedidos "em andamento" (pendentes ou em preparo).
+
+Atualizar o status do pedido (ex: "Em preparo", "Saiu para entrega").
+
+Finalizar pedidos, encaminhando-os para a entrega.
+
+4. Visão e Funcionalidades do Administrador
+Possui todas as permissões de Funcionário.
+
+Gerenciamento de Usuários (CRUD):
+
+Cadastrar novos usuários (incluindo funcionários e outros administradores).
+
+Editar dados de usuários.
+
+Excluir usuários.
+
+Alterar o nível de permissão de um usuário (de cliente para funcionário, etc.).
+
+5. Modelo de Dados (Banco de Dados SQL - PostgreSQL)
+Gere um script SQL (para PostgreSQL, compatível com Google Cloud SQL) que crie as seguintes tabelas, garantindo que as informações possam ser registradas, consultadas e deletadas:
+
+Tabela: Usuarios
+
+usuario_id (SERIAL, Chave Primária, gerado automaticamente)
+
+nome (VARCHAR)
+
+email (VARCHAR, UNIQUE, NOT NULL)
+
+senha_hash (VARCHAR, NOT NULL)
+
+permissao (ENUM('cliente', 'funcionario', 'admin'), NOT NULL, DEFAULT 'cliente')
+
+aceite_lgpd (BOOLEAN, NOT NULL)
+
+Tabela: Produtos
+
+produto_id (SERIAL, Chave Primária, gerado automaticamente)
+
+nome (VARCHAR, NOT NULL)
+
+descricao (TEXT)
+
+foto_url (VARCHAR)
+
+Tabela: Pedidos
+
+pedido_id (SERIAL, Chave Primária)
+
+usuario_id (INTEGER, Chave Estrangeira para Usuarios(usuario_id))
+
+data_pedido (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
+
+status_pedido (VARCHAR, NOT NULL, DEFAULT 'pendente')
+
+valor_total (DECIMAL(10, 2), NOT NULL)
+
+Tabela: Itens_Pedido
+
+item_id (SERIAL, Chave Primária)
+
+pedido_id (INTEGER, Chave Estrangeira para Pedidos(pedido_id))
+
+produto_id (INTEGER, Chave Estrangeira para Produtos(produto_id))
+
+quantidade (INTEGER, NOT NULL)
+
+preco_unitario (DECIMAL(10, 2), NOT NULL)
+
+Tabela: Avaliacoes
+
+avaliacao_id (SERIAL, Chave Primária)
+
+produto_id (INTEGER, Chave Estrangeira para Produtos(produto_id))
+
+usuario_id (INTEGER, Chave Estrangeira para Usuarios(usuario_id))
+
+nota (INTEGER, CHECK (nota >= 1 AND nota <= 5))
+
+comentario (TEXT)
+
+data_avaliacao (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
+
+*(Restrição: O usuário só pode avaliar um produto que ele comprou).

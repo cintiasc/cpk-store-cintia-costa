@@ -1,0 +1,119 @@
+Assunto: Criação de um site de e-commerce "Cupcake Store"
+
+Objetivo: Gerar o código-fonte para um site de e-commerce completo.
+
+1. Visão Geral do Projeto
+Produto: Loja virtual para venda de cupcakes.
+
+Plataforma de Destino: Aplicação web com banco de dados hospedado no Google Cloud (o script SQL deve ser compatível, ex: PostgreSQL ou MySQL).
+
+Autenticação: O sistema deve ter autenticação segura baseada em e-mail e senha.
+
+2. Modelos de Usuário e Permissões
+O site deve ter 3 níveis de permissão (Roles):
+
+Cliente: Pode navegar, comprar e avaliar produtos.
+
+Funcionário: Pode gerenciar produtos e pedidos.
+
+Administrador: (Herda permissões de funcionário) e pode gerenciar usuários.
+
+3. Recursos de Autenticação (Comum a todos)
+Cadastro de Novo Usuário:
+
+Campos: Nome completo, e-mail (usado para login), senha (deve ser armazenada com hash).
+
+Validação: Deve incluir um checkbox para "Aceito os termos da LGPD".
+
+Login de Usuário:
+
+Campos: E-mail e senha.
+
+Lógica: Acesso concedido apenas se o e-mail e a senha corresponderem aos registros do banco.
+
+4. Recursos da Visão "Cliente"
+Galeria de Produtos: Visualizar todos os produtos (foto, nome, descrição, avaliação média).
+
+Carrinho de Compras: Adicionar e remover produtos do carrinho.
+
+Checkout: Finalizar a compra (detalhes do pedido, total).
+
+Histórico de Pedidos: Ver pedidos anteriores e ter um botão para "Repetir Pedido".
+
+Avaliação de Produto: Após a compra ser concluída, o cliente deve poder atribuir uma avaliação (ex: 1 a 5 estrelas) ao produto.
+
+5. Recursos da Visão "Funcionário" / "Administrador"
+Gerenciamento de Produtos (CRUD):
+
+Cadastrar, editar e excluir produtos.
+
+Gerenciamento de Pedidos:
+
+Visualizar pedidos "em andamento".
+
+Marcar pedidos como "Finalizados" ou "Enviados para entrega".
+
+6. Estrutura do Banco de Dados (SQL)
+Solicito o script SQL para criar as seguintes tabelas:
+
+Tabela usuarios:
+
+id_usuario (INT, Chave Primária, Auto-incremento)
+
+nome (VARCHAR)
+
+email (VARCHAR, Único, Não Nulo)
+
+senha_hash (VARCHAR, Não Nulo)
+
+tipo_usuario (ENUM ou VARCHAR, ex: 'cliente', 'funcionario', 'admin')
+
+aceite_lgpd (BOOLEAN, Não Nulo)
+
+Tabela produtos:
+
+id_produto (INT, Chave Primária, Auto-incremento)
+
+nome (VARCHAR)
+
+descricao (TEXT)
+
+foto_url (VARCHAR)
+
+preco_unitario (DECIMAL)
+
+(Nota: A avaliação será calculada a partir da tabela avaliacoes)
+
+Tabela pedidos: (Registra a ordem geral)
+
+id_pedido (INT, Chave Primária, Auto-incremento)
+
+id_usuario (INT, Chave Estrangeira de usuarios)
+
+data_pedido (TIMESTAMP, Padrão: NOW())
+
+status_pedido (VARCHAR, ex: 'em_andamento', 'finalizado', 'entregue')
+
+valor_total (DECIMAL)
+
+Tabela itens_pedido: (Registra os produtos dentro de um pedido)
+
+id_item (INT, Chave Primária, Auto-incremento)
+
+id_pedido (INT, Chave Estrangeira de pedidos)
+
+id_produto (INT, Chave Estrangeira de produtos)
+
+quantidade (INT)
+
+preco_unitario_na_compra (DECIMAL)
+
+Tabela avaliacoes:
+
+id_avaliacao (INT, Chave Primária, Auto-incremento)
+
+id_usuario (INT, Chave Estrangeira de usuarios)
+
+id_produto (INT, Chave Estrangeira de produtos)
+
+nota (INT, ex: 1 a 5)
