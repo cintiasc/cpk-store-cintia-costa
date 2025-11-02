@@ -46,14 +46,6 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// Categories table
-export const categories = pgTable("categories", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar("name", { length: 100 }).notNull().unique(),
-  description: text("description"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
 // Products table
 export const products = pgTable("products", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
@@ -61,7 +53,6 @@ export const products = pgTable("products", {
   description: text("description"),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   imageUrl: varchar("image_url", { length: 500 }),
-  categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
