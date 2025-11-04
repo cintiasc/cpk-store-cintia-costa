@@ -1,16 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ReviewModal } from "@/components/review-modal";
 import { useAuth } from "@/hooks/useAuth";
 import { useCart } from "@/hooks/useCart";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import type { OrderWithItems } from "@shared/schema";
-import { RotateCcw } from "lucide-react";
+import type { OrderWithItems, Product } from "@shared/schema";
+import { RotateCcw, Star } from "lucide-react";
 import { formatCurrency } from "@/lib/formatters";
 
 export default function Orders() {
@@ -18,6 +19,7 @@ export default function Orders() {
   const { toast } = useToast();
   const clearCart = useCart((state) => state.clearCart);
   const addItem = useCart((state) => state.addItem);
+  const [reviewProduct, setReviewProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -35,6 +37,34 @@ export default function Orders() {
   const { data: orders, isLoading } = useQuery<OrderWithItems[]>({
     queryKey: ["/api/orders"],
     enabled: !!user,
+  });
+
+  // Get all unique product IDs from all orders
+  const productIds = orders?.flatMap(order => 
+    order.items.map(item => item.productId)
+  ).filter((id, index, self) => self.indexOf(id) === index) || [];
+
+  // Check review eligibility for each product
+  const reviewEligibility = useQuery<Record<number, boolean>>({
+    queryKey: ["/api/products/can-review", productIds],
+    queryFn: async () => {
+      if (!user || productIds.length === 0) return {};
+      
+      const results: Record<number, boolean> = {};
+      await Promise.all(
+        productIds.map(async (productId) => {
+          try {
+            const response = await fetch(`/api/products/${productId}/can-review`);
+            const data = await response.json();
+            results[productId] = data.canReview;
+          } catch {
+            results[productId] = false;
+          }
+        })
+      );
+      return results;
+    },
+    enabled: !!user && productIds.length > 0,
   });
 
   const repeatOrderMutation = useMutation({
@@ -188,9 +218,22 @@ export default function Orders() {
                           Quantidade: {item.quantity} × {formatCurrency(item.priceAtPurchase)}
                         </p>
                       </div>
-                      <p className="font-semibold">
-                        {formatCurrency(parseFloat(item.priceAtPurchase) * item.quantity)}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        <p className="font-semibold">
+                          {formatCurrency(parseFloat(item.priceAtPurchase) * item.quantity)}
+                        </p>
+                        {reviewEligibility.data?.[item.productId] && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setReviewProduct(item.product)}
+                            data-testid={`button-review-product-${item.productId}`}
+                          >
+                            <Star className="h-4 w-4 mr-2" />
+                            Avaliar
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -208,6 +251,14 @@ export default function Orders() {
           </div>
         )}
       </main>
+
+      {reviewProduct && (
+        <ReviewModal
+          product={reviewProduct}
+          isOpen={!!reviewProduct}
+          onClose={() => setReviewProduct(null)}
+        />
+      )}
     </div>
   );
 }
