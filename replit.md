@@ -9,11 +9,20 @@ The system provides core e-commerce functionality including product browsing, sh
 ## Recent Changes
 
 **November 4, 2025:**
+- ✅ **User Editing for Admins**: Admins can now edit existing users (name, email, phone, role)
+  - Created `PATCH /api/admin/users/:id` endpoint with secure validation
+  - Added `updateUserSchema` in shared/schema for input validation
+  - Implemented `storage.updateUser()` with email uniqueness check
+  - Admin UI includes edit button and modal for each user
+  - SMS notification sent when admin updates user (if phone number exists)
+  - Secure implementation: schema validation prevents arbitrary field updates
+  - Error handling: duplicate email returns 409, validation errors return 400
 - ✅ **SMS Notification System (Simulation)**: Implemented SMS notification infrastructure
   - Added `phoneNumber` field to users and preassigned_roles tables
   - Created `smsService.ts` for SMS simulation (console logging)
   - SMS sent when admin pre-registers user with phone number (welcome message)
   - SMS sent when order status changes to "ready_for_delivery" (order ready notification)
+  - SMS sent when admin edits user information (update notification)
   - Ready for integration with real SMS providers (Twilio, Infobip, SMSDev, etc.)
   - Admin UI updated with optional phone field in pre-registration form
   - Phone number automatically applied on first login if provided in pre-registration
