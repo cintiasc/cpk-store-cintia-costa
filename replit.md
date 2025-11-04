@@ -9,6 +9,13 @@ The system provides core e-commerce functionality including product browsing, sh
 ## Recent Changes
 
 **November 4, 2025:**
+- ✅ **Product Reviews from Orders Page**: Clients can now easily review purchased products
+  - Created reusable `ReviewModal` component with star rating (1-5) and optional comment
+  - Added "Avaliar" button for each reviewable product on Orders page
+  - Query checks review eligibility for all products in user's orders
+  - Modal prevents closing during submission to preserve user data
+  - Cache invalidation ensures buttons disappear after review submission
+  - Intuitive UX: buttons only appear for delivered products that haven't been reviewed
 - ✅ **User Editing for Admins**: Admins can now edit existing users (name, email, phone, role)
   - Created `PATCH /api/admin/users/:id` endpoint with secure validation
   - Added `updateUserSchema` in shared/schema for input validation
