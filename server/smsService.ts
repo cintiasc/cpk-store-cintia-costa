@@ -105,3 +105,45 @@ Obrigado pela preferência!
 
   await sendSMS({ to: phoneNumber, message });
 }
+
+/**
+ * Sends notification when user account is updated by admin
+ */
+export async function sendUserUpdatedSMS(params: {
+  phoneNumber: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  role: string;
+}): Promise<void> {
+  const { phoneNumber, firstName, lastName, email, role } = params;
+  
+  const roleNames: Record<string, string> = {
+    client: 'Cliente',
+    employee: 'Funcionário',
+    admin: 'Administrador',
+  };
+
+  const fullName = firstName && lastName ? `${firstName} ${lastName}` : firstName || 'Usuário';
+  const greeting = `Olá ${fullName}`;
+  const roleName = roleNames[role] || role;
+
+  const message = `${greeting}! 🧁
+
+Seu cadastro na Cupcake Store foi ATUALIZADO pelo administrador.
+
+📧 Email: ${email}
+👤 Nível de acesso: ${roleName}
+🔐 Acesso: Use sua conta Replit para fazer login
+
+Para acessar o sistema:
+1. Acesse a Cupcake Store
+2. Clique em "Entrar"
+3. Faça login com sua conta Replit
+
+Qualquer dúvida, entre em contato com nosso suporte.
+
+- Equipe Cupcake Store`;
+
+  await sendSMS({ to: phoneNumber, message });
+}

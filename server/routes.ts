@@ -278,6 +278,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/admin/users/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      const { firstName, lastName, email, role, phoneNumber } = req.body;
+      
+      // Get current user data
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      // Update user with new data
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        email: email || currentUser.email,
+        firstName: firstName !== undefined ? firstName : currentUser.firstName,
+        lastName: lastName !== undefined ? lastName : currentUser.lastName,
+        phoneNumber: phoneNumber !== undefined ? phoneNumber : currentUser.phoneNumber,
+        role: role || currentUser.role,
+        lgpdAccepted: currentUser.lgpdAccepted,
+        lgpdAcceptedAt: currentUser.lgpdAcceptedAt,
+      });
+      
+      // Send SMS notification if user has phone number
+      if (updatedUser.phoneNumber) {
+        const { sendUserUpdatedSMS } = await import('./smsService');
+        await sendUserUpdatedSMS({
+          phoneNumber: updatedUser.phoneNumber,
+          firstName: updatedUser.firstName || undefined,
+          lastName: updatedUser.lastName || undefined,
+          email: updatedUser.email,
+          role: updatedUser.role,
+        });
+      }
+      
+      res.json(updatedUser);
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      if (error.code === '23505') { // Unique violation
+        return res.status(409).json({ message: "Email já está em uso por outro usuário" });
+      }
+      res.status(500).json({ message: "Falha ao atualizar usuário" });
+    }
+  });
+
   app.delete('/api/admin/users/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const userId = req.params.id;
