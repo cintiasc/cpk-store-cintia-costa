@@ -35,6 +35,7 @@ export default function Admin() {
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserFirstName, setNewUserFirstName] = useState("");
   const [newUserLastName, setNewUserLastName] = useState("");
+  const [newUserPhoneNumber, setNewUserPhoneNumber] = useState("");
   const [newUserRole, setNewUserRole] = useState<string>("client");
 
   useEffect(() => {
@@ -123,19 +124,20 @@ export default function Admin() {
   });
 
   const createPreassignedRoleMutation = useMutation({
-    mutationFn: async ({ email, firstName, lastName, role }: { email: string; firstName?: string; lastName?: string; role: string }) => {
-      return await apiRequest("POST", "/api/admin/preassigned-roles", { email, firstName, lastName, role });
+    mutationFn: async ({ email, firstName, lastName, phoneNumber, role }: { email: string; firstName?: string; lastName?: string; phoneNumber?: string; role: string }) => {
+      return await apiRequest("POST", "/api/admin/preassigned-roles", { email, firstName, lastName, phoneNumber, role });
     },
     onSuccess: () => {
       toast({
         title: "Usuário pré-cadastrado",
-        description: "Usuário receberá este perfil no primeiro login",
+        description: phoneNumber ? "Usuário receberá SMS com instruções de acesso" : "Usuário receberá este perfil no primeiro login",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/preassigned-roles"] });
       setNewUserDialogOpen(false);
       setNewUserEmail("");
       setNewUserFirstName("");
       setNewUserLastName("");
+      setNewUserPhoneNumber("");
       setNewUserRole("client");
     },
     onError: (error: Error) => {
@@ -199,7 +201,8 @@ export default function Admin() {
       return;
     }
     createPreassignedRoleMutation.mutate({ 
-      email: newUserEmail, 
+      email: newUserEmail,
+      phoneNumber: newUserPhoneNumber, 
       firstName: newUserFirstName || undefined,
       lastName: newUserLastName || undefined,
       role: newUserRole 
@@ -295,6 +298,20 @@ export default function Admin() {
                       onChange={(e) => setNewUserEmail(e.target.value)}
                       data-testid="input-new-user-email"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phoneNumber">Telefone (opcional)</Label>
+                    <Input
+                      id="phoneNumber"
+                      type="tel"
+                      placeholder="(11) 98765-4321"
+                      value={newUserPhoneNumber}
+                      onChange={(e) => setNewUserPhoneNumber(e.target.value)}
+                      data-testid="input-new-user-phone"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Se fornecido, enviará SMS com instruções de acesso
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="role">Nível de Acesso</Label>
