@@ -150,6 +150,16 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Schema for updating user (admin only) - restricted fields for security
+export const updateUserSchema = z.object({
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  email: z.string().email("Email inválido"),
+  phoneNumber: z.string().max(20).optional().or(z.literal('')),
+  role: z.enum(["client", "employee", "admin"]),
+});
+export type UpdateUser = z.infer<typeof updateUserSchema>;
+
 // Types for Products
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,

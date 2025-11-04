@@ -281,25 +281,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/users/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const userId = req.params.id;
-      const { firstName, lastName, email, role, phoneNumber } = req.body;
       
-      // Get current user data
+      // Validate request body against schema
+      const { updateUserSchema } = await import('@shared/schema');
+      const validationResult = updateUserSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: validationResult.error.issues 
+        });
+      }
+      
+      const validatedData = validationResult.data;
+      
+      // Get current user to verify existence
       const currentUser = await storage.getUser(userId);
       if (!currentUser) {
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
       
-      // Update user with new data
-      const updatedUser = await storage.upsertUser({
-        id: userId,
-        email: email || currentUser.email,
-        firstName: firstName !== undefined ? firstName : currentUser.firstName,
-        lastName: lastName !== undefined ? lastName : currentUser.lastName,
-        phoneNumber: phoneNumber !== undefined ? phoneNumber : currentUser.phoneNumber,
-        role: role || currentUser.role,
-        lgpdAccepted: currentUser.lgpdAccepted,
-        lgpdAcceptedAt: currentUser.lgpdAcceptedAt,
+      // Update user using storage method (with email uniqueness check)
+      const updatedUser = await storage.updateUser(userId, {
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        email: validatedData.email,
+        phoneNumber: validatedData.phoneNumber || undefined,
+        role: validatedData.role,
       });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Falha ao atualizar usuário" });
+      }
       
       // Send SMS notification if user has phone number
       if (updatedUser.phoneNumber) {
@@ -316,10 +329,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedUser);
     } catch (error: any) {
       console.error("Error updating user:", error);
+      
+      // Handle specific error types
+      if (error.message === "Email já está em uso por outro usuário") {
+        return res.status(409).json({ message: error.message });
+      }
+      
       if (error.code === '23505') { // Unique violation
         return res.status(409).json({ message: "Email já está em uso por outro usuário" });
       }
-      res.status(500).json({ message: "Falha ao atualizar usuário" });
+      
+      res.status(500).json({ message: error.message || "Falha ao atualizar usuário" });
     }
   });
 

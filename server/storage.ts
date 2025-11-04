@@ -32,6 +32,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUserRole(id: string, role: string): Promise<User | undefined>;
+  updateUser(id: string, data: { firstName?: string; lastName?: string; email: string; phoneNumber?: string; role: string }): Promise<User | undefined>;
   deleteUser(id: string): Promise<void>;
   
   // Product operations
@@ -119,6 +120,38 @@ export class DatabaseStorage implements IStorage {
       .set({ role: role as any, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
+    return user;
+  }
+
+  async updateUser(id: string, data: { firstName?: string; lastName?: string; email: string; phoneNumber?: string; role: string }): Promise<User | undefined> {
+    // Check if email is being changed to an existing email (different user)
+    if (data.email) {
+      const [existingUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, data.email));
+      
+      if (existingUser && existingUser.id !== id) {
+        throw new Error("Email já está em uso por outro usuário");
+      }
+    }
+
+    // Update only the allowed fields
+    const updateData: any = {
+      firstName: data.firstName || null,
+      lastName: data.lastName || null,
+      email: data.email,
+      phoneNumber: data.phoneNumber || null,
+      role: data.role as any,
+      updatedAt: new Date(),
+    };
+
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, id))
+      .returning();
+    
     return user;
   }
 
