@@ -210,6 +210,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Order not found" });
       }
       
+      // Send SMS notification when order is ready for delivery
+      if (status === 'ready_for_delivery') {
+        const orderWithDetails = await storage.getOrderWithItems(orderId);
+        const user = await storage.getUser(order.userId);
+        
+        if (user?.phoneNumber && orderWithDetails) {
+          const { sendOrderReadySMS } = await import('./smsService');
+          const customerName = user.firstName ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}` : undefined;
+          
+          await sendOrderReadySMS({
+            phoneNumber: user.phoneNumber,
+            customerName,
+            orderId: orderWithDetails.id,
+            totalAmount: orderWithDetails.totalAmount,
+          });
+        }
+      }
+      
       res.json(order);
     } catch (error: any) {
       console.error("Error updating order status:", error);
@@ -284,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/preassigned-roles', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const { email, firstName, lastName, role } = req.body;
+      const { email, firstName, lastName, phoneNumber, role } = req.body;
       const createdBy = req.user.claims.sub;
       
       if (!email || !role) {
@@ -299,9 +317,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email, 
         firstName: firstName || undefined,
         lastName: lastName || undefined,
+        phoneNumber: phoneNumber || undefined,
         role, 
         createdBy 
       });
+      
+      // Send welcome SMS if phone number provided
+      if (phoneNumber) {
+        const { sendWelcomeSMS } = await import('./smsService');
+        await sendWelcomeSMS({
+          phoneNumber,
+          firstName,
+          email,
+          role,
+        });
+      }
+      
       res.status(201).json(preassignedRole);
     } catch (error: any) {
       console.error("Error creating preassigned role:", error);
