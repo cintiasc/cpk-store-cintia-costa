@@ -35,9 +35,12 @@ export function ReviewModal({ product, isOpen, onClose }: ReviewModalProps) {
         title: "Avaliação enviada",
         description: "Obrigado pela sua avaliação!",
       });
+      // Invalidate product-specific queries
       queryClient.invalidateQueries({ queryKey: ["/api/products", product.id, "reviews"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products", product.id, "can-review"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products", product.id] });
+      // Invalidate all can-review queries (updates Orders page buttons)
+      queryClient.invalidateQueries({ queryKey: ["/api/products/can-review"] });
       setRating(0);
       setComment("");
       onClose();
@@ -65,13 +68,21 @@ export function ReviewModal({ product, isOpen, onClose }: ReviewModalProps) {
   };
 
   const handleClose = () => {
+    // Prevent closing while submission is in progress
+    if (reviewMutation.isPending) {
+      return;
+    }
     setRating(0);
     setComment("");
     onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        handleClose();
+      }
+    }}>
       <DialogContent data-testid="dialog-review-modal">
         <DialogHeader>
           <DialogTitle data-testid="text-review-modal-title">
