@@ -26,7 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { User, PreassignedRole } from "@shared/schema";
-import { Trash2, UserPlus } from "lucide-react";
+import { Trash2, UserPlus, Edit } from "lucide-react";
 
 export default function Admin() {
   const { user, isAdmin, isLoading: authLoading } = useAuth();
@@ -37,6 +37,15 @@ export default function Admin() {
   const [newUserLastName, setNewUserLastName] = useState("");
   const [newUserPhoneNumber, setNewUserPhoneNumber] = useState("");
   const [newUserRole, setNewUserRole] = useState<string>("client");
+  
+  // Edit user states
+  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editUserFirstName, setEditUserFirstName] = useState("");
+  const [editUserLastName, setEditUserLastName] = useState("");
+  const [editUserEmail, setEditUserEmail] = useState("");
+  const [editUserPhoneNumber, setEditUserPhoneNumber] = useState("");
+  const [editUserRole, setEditUserRole] = useState<string>("client");
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -87,6 +96,39 @@ export default function Admin() {
       toast({
         title: "Erro",
         description: error.message || "Falha ao atualizar papel do usuário",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ userId, data }: { userId: string; data: any }) => {
+      return await apiRequest("PATCH", `/api/admin/users/${userId}`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Usuário atualizado",
+        description: "Dados do usuário foram alterados com sucesso. SMS enviado se telefone fornecido.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setEditUserDialogOpen(false);
+      setEditingUser(null);
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Não Autorizado",
+          description: "Você foi desconectado. Fazendo login novamente...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Erro",
+        description: error.message || "Falha ao atualizar usuário",
         variant: "destructive",
       });
     },
@@ -206,6 +248,40 @@ export default function Admin() {
       firstName: newUserFirstName || undefined,
       lastName: newUserLastName || undefined,
       role: newUserRole 
+    });
+  };
+
+  const handleOpenEditUser = (userItem: User) => {
+    setEditingUser(userItem);
+    setEditUserFirstName(userItem.firstName || "");
+    setEditUserLastName(userItem.lastName || "");
+    setEditUserEmail(userItem.email);
+    setEditUserPhoneNumber(userItem.phoneNumber || "");
+    setEditUserRole(userItem.role);
+    setEditUserDialogOpen(true);
+  };
+
+  const handleUpdateUser = () => {
+    if (!editingUser) return;
+    
+    if (!editUserEmail) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Email é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    updateUserMutation.mutate({
+      userId: editingUser.id,
+      data: {
+        firstName: editUserFirstName || undefined,
+        lastName: editUserLastName || undefined,
+        email: editUserEmail,
+        phoneNumber: editUserPhoneNumber || undefined,
+        role: editUserRole,
+      },
     });
   };
 
@@ -402,6 +478,100 @@ export default function Admin() {
           </div>
         </section>
 
+        {/* Edit User Dialog */}
+        <Dialog open={editUserDialogOpen} onOpenChange={setEditUserDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Usuário</DialogTitle>
+              <DialogDescription>
+                Altere os dados do usuário. Um SMS será enviado se telefone fornecido.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-firstName">Nome</Label>
+                <Input
+                  id="edit-firstName"
+                  type="text"
+                  placeholder="João"
+                  value={editUserFirstName}
+                  onChange={(e) => setEditUserFirstName(e.target.value)}
+                  data-testid="input-edit-user-firstname"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-lastName">Sobrenome</Label>
+                <Input
+                  id="edit-lastName"
+                  type="text"
+                  placeholder="Silva"
+                  value={editUserLastName}
+                  onChange={(e) => setEditUserLastName(e.target.value)}
+                  data-testid="input-edit-user-lastname"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email *</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  placeholder="usuario@exemplo.com"
+                  value={editUserEmail}
+                  onChange={(e) => setEditUserEmail(e.target.value)}
+                  data-testid="input-edit-user-email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phoneNumber">Telefone (opcional)</Label>
+                <Input
+                  id="edit-phoneNumber"
+                  type="tel"
+                  placeholder="(11) 98765-4321"
+                  value={editUserPhoneNumber}
+                  onChange={(e) => setEditUserPhoneNumber(e.target.value)}
+                  data-testid="input-edit-user-phone"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Se fornecido, enviará SMS notificando atualização
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-role">Nível de Acesso *</Label>
+                <Select value={editUserRole} onValueChange={setEditUserRole}>
+                  <SelectTrigger data-testid="select-edit-user-role">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="client">Cliente</SelectItem>
+                    <SelectItem value="employee">Funcionário</SelectItem>
+                    <SelectItem value="admin">Administrador</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex justify-end gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditUserDialogOpen(false);
+                    setEditingUser(null);
+                  }}
+                  data-testid="button-cancel-edit-user"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleUpdateUser}
+                  disabled={updateUserMutation.isPending}
+                  data-testid="button-save-edit-user"
+                >
+                  {updateUserMutation.isPending ? "Salvando..." : "Salvar Alterações"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Existing Users Section */}
         <section>
           <h2 className="font-serif text-2xl font-semibold mb-6">Usuários Existentes</h2>
@@ -445,6 +615,18 @@ export default function Admin() {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenEditUser(userItem)}
+                      disabled={updateUserMutation.isPending}
+                      data-testid={`button-edit-user-${userItem.id}`}
+                      title="Editar usuário"
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Editar
+                    </Button>
+                    
                     <Select
                       value={userItem.role}
                       onValueChange={(value) =>
