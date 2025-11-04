@@ -127,10 +127,10 @@ export default function Admin() {
     mutationFn: async ({ email, firstName, lastName, phoneNumber, role }: { email: string; firstName?: string; lastName?: string; phoneNumber?: string; role: string }) => {
       return await apiRequest("POST", "/api/admin/preassigned-roles", { email, firstName, lastName, phoneNumber, role });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast({
         title: "Usuário pré-cadastrado",
-        description: phoneNumber ? "Usuário receberá SMS com instruções de acesso" : "Usuário receberá este perfil no primeiro login",
+        description: variables.phoneNumber ? "Usuário receberá SMS com instruções de acesso" : "Usuário receberá este perfil no primeiro login",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/preassigned-roles"] });
       setNewUserDialogOpen(false);

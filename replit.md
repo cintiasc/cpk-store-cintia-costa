@@ -8,6 +8,16 @@ The system provides core e-commerce functionality including product browsing, sh
 
 ## Recent Changes
 
+**November 4, 2025:**
+- ✅ **SMS Notification System (Simulation)**: Implemented SMS notification infrastructure
+  - Added `phoneNumber` field to users and preassigned_roles tables
+  - Created `smsService.ts` for SMS simulation (console logging)
+  - SMS sent when admin pre-registers user with phone number (welcome message)
+  - SMS sent when order status changes to "ready_for_delivery" (order ready notification)
+  - Ready for integration with real SMS providers (Twilio, Infobip, SMSDev, etc.)
+  - Admin UI updated with optional phone field in pre-registration form
+  - Phone number automatically applied on first login if provided in pre-registration
+  
 **November 2, 2025:**
 - ✅ **Enhanced Pre-registration System**: Admins can now specify optional firstName and lastName when pre-registering users. Names are automatically applied on first login if Replit profile lacks them.
 - ✅ **Bug Fix: Repeat Order**: Fixed TypeError where mutation wasn't parsing response as JSON. Added `.json()` call.
@@ -102,13 +112,13 @@ Preferred communication style: Simple, everyday language.
 ### Database Schema
 
 **Core Tables:**
-1. **users**: User accounts with role-based permissions (client, employee, admin), LGPD acceptance tracking
+1. **users**: User accounts with role-based permissions (client, employee, admin), LGPD acceptance tracking, phone number for SMS notifications
 2. **products**: Cupcake products with name, description, price, image, stock quantity, **isActive** (soft delete flag)
 3. **orders**: Customer orders with status tracking (pending, in_preparation, ready_for_delivery, delivered)
 4. **orderItems**: Individual line items within orders with price snapshot at purchase
 5. **reviews**: Product reviews with ratings (1-5) and comments, linked to verified purchases
 6. **sessions**: Session storage for authentication (required by Replit Auth)
-7. **preassigned_roles**: Pre-assigned roles for users before first login (email, firstName, lastName, role, createdBy, consumed)
+7. **preassigned_roles**: Pre-assigned roles for users before first login (email, firstName, lastName, phoneNumber, role, createdBy, consumed)
 
 **Key Relationships:**
 - Users → Orders (one-to-many)
