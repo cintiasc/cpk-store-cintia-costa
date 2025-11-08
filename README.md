@@ -1,6 +1,6 @@
 # 🧁 Cupcake Store - E-Commerce de Cupcakes
 
-Plataforma completa de e-commerce para venda de cupcakes online, com sistema de autenticação Replit Auth, gestão de pedidos, avaliações de produtos e painel administrativo.
+Este repositório documenta o projeto final da disciplina **Projeto Integrador Transdisciplinar em Engenharia de Software II**. 
 
 ---
 
@@ -19,7 +19,7 @@ Plataforma completa de e-commerce para venda de cupcakes online, com sistema de 
 
 ## 🎯 Visão Geral
 
-Este repositório documenta o projeto final da disciplina **Projeto Integrador Transdisciplinar em Engenharia de Software II**. O objetivo principal foi aplicar os conceitos de engenharia de software (requisitos, design, implementação, testes) no desenvolvimento de uma aplicação full-stack.
+O objetivo principal foi aplicar os conceitos de engenharia de software (requisitos, design, implementação, testes) no desenvolvimento de uma aplicação full-stack.
 
 A **Cupcake Store** é a plataforma de e-commerce resultante, desenvolvida com React e Node.js, que permite a venda online de cupcakes. A plataforma oferece uma experiência completa para clientes, funcionários e administradores, com recursos de:
 
