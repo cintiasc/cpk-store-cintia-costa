@@ -19,7 +19,9 @@ Plataforma completa de e-commerce para venda de cupcakes online, com sistema de 
 
 ## 🎯 Visão Geral
 
-A **Cupcake Store** é uma aplicação full-stack desenvolvida com React e Node.js que permite a venda online de cupcakes. A plataforma oferece uma experiência completa para clientes, funcionários e administradores, com recursos de:
+Este repositório documenta o projeto final da disciplina **Projeto Integrador Transdisciplinar em Engenharia de Software II**. O objetivo principal foi aplicar os conceitos de engenharia de software (requisitos, design, implementação, testes) no desenvolvimento de uma aplicação full-stack.
+
+A **Cupcake Store** é a plataforma de e-commerce resultante, desenvolvida com React e Node.js, que permite a venda online de cupcakes. A plataforma oferece uma experiência completa para clientes, funcionários e administradores, com recursos de:
 
 - Catálogo de produtos com avaliações
 - Carrinho de compras e checkout
@@ -375,7 +377,7 @@ npm run db:migrate
 
 ## 📄 Licença
 
-Este projeto foi desenvolvido para fins educacionais e comerciais.
+Este projeto foi desenvolvido exclusivamente para fins acadêmicos, como requisito de avaliação da disciplina "Projeto Integrador Transdisciplinar em Engenharia de Software II".
 
 ---
 
