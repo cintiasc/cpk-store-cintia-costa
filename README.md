@@ -385,8 +385,6 @@ Este projeto foi desenvolvido exclusivamente para fins acadêmicos, como requisi
 
 Desenvolvido com ❤️ usando React, Node.js, PostgreSQL e Replit.
 
-Para suporte ou dúvidas sobre o Replit, consulte a [documentação oficial](https://docs.replit.com).
-
 ---
 
 ## 🚀 Próximos Passos
@@ -406,6 +404,3 @@ Sugestões para evolução da plataforma:
 - [ ] Sistema de categorias de produtos
 - [ ] Gestão de estoque com alertas
 
----
-
-**Feito com 🧁 pela equipe Cupcake Store**
