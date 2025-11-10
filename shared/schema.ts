@@ -41,6 +41,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   phoneNumber: varchar("phone_number", { length: 20 }),
+  address: text("address"),
   profileImageUrl: varchar("profile_image_url"),
   role: userRoleEnum("role").default("client").notNull(),
   lgpdAccepted: timestamp("lgpd_accepted"),
@@ -55,6 +56,7 @@ export const preassignedRoles = pgTable("preassigned_roles", {
   firstName: varchar("first_name", { length: 255 }),
   lastName: varchar("last_name", { length: 255 }),
   phoneNumber: varchar("phone_number", { length: 20 }),
+  address: text("address"),
   role: userRoleEnum("role").notNull(),
   createdBy: varchar("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
   consumed: boolean("consumed").default(false).notNull(),
@@ -156,6 +158,7 @@ export const updateUserSchema = z.object({
   lastName: z.string().optional(),
   email: z.string().email("Email inválido"),
   phoneNumber: z.string().max(20).optional().or(z.literal('')),
+  address: z.string().optional().or(z.literal('')),
   role: z.enum(["client", "employee", "admin"]),
 });
 export type UpdateUser = z.infer<typeof updateUserSchema>;

@@ -377,13 +377,15 @@ npm run db:migrate
 
 ## 📄 Licença
 
-Este projeto foi desenvolvido exclusivamente para fins acadêmicos, como requisito de avaliação da disciplina "Projeto Integrador Transdisciplinar em Engenharia de Software II".
+Este projeto foi desenvolvido para fins educacionais e comerciais.
 
 ---
 
 ## 👨‍💻 Desenvolvimento
 
 Desenvolvido com ❤️ usando React, Node.js, PostgreSQL e Replit.
+
+Para suporte ou dúvidas sobre o Replit, consulte a [documentação oficial](https://docs.replit.com).
 
 ---
 
@@ -403,4 +405,3 @@ Sugestões para evolução da plataforma:
 - [ ] Upload de imagens de produtos
 - [ ] Sistema de categorias de produtos
 - [ ] Gestão de estoque com alertas
-

@@ -103,6 +103,12 @@ export function Header() {
                   </p>
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" data-testid="menu-profile">
+                    <User className="mr-2 h-4 w-4" />
+                    Meu Perfil
+                  </Link>
+                </DropdownMenuItem>
                 {isEmployee && (
                   <>
                     <DropdownMenuItem asChild>
@@ -111,9 +117,9 @@ export function Header() {
                         Painel
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
                   </>
                 )}
+                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <a href="/api/logout" data-testid="button-logout">
                     <LogOut className="mr-2 h-4 w-4" />

@@ -63,6 +63,7 @@ async function upsertUser(
   let firstName = claims["first_name"];
   let lastName = claims["last_name"];
   let phoneNumber = undefined;
+  let address = undefined;
   let preassignedRole = null;
   
   // If it's a new user (first login), check for preassigned role and names
@@ -80,16 +81,21 @@ async function upsertUser(
       if (preassignedRole.phoneNumber) {
         phoneNumber = preassignedRole.phoneNumber;
       }
+      // Use preassigned address if provided
+      if (preassignedRole.address) {
+        address = preassignedRole.address;
+      }
     }
   }
   
-  // Upsert user with names and phone (from Replit or preassigned)
+  // Upsert user with names, phone and address (from Replit or preassigned)
   await storage.upsertUser({
     id: userId,
     email: userEmail,
     firstName,
     lastName,
     phoneNumber: existingUser?.phoneNumber || phoneNumber,
+    address: existingUser?.address || address,
     profileImageUrl: claims["profile_image_url"],
     lgpdAccepted: existingUser ? existingUser.lgpdAccepted : new Date(), // Keep original LGPD date or set on first login
   });

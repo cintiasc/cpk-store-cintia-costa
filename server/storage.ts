@@ -32,7 +32,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUserRole(id: string, role: string): Promise<User | undefined>;
-  updateUser(id: string, data: { firstName?: string; lastName?: string; email: string; phoneNumber?: string; role: string }): Promise<User | undefined>;
+  updateUser(id: string, data: { firstName?: string; lastName?: string; email: string; phoneNumber?: string; address?: string; role: string }): Promise<User | undefined>;
   deleteUser(id: string): Promise<void>;
   
   // Product operations
@@ -123,7 +123,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUser(id: string, data: { firstName?: string; lastName?: string; email: string; phoneNumber?: string; role: string }): Promise<User | undefined> {
+  async updateUser(id: string, data: { firstName?: string; lastName?: string; email: string; phoneNumber?: string; address?: string; role: string }): Promise<User | undefined> {
     // Check if email is being changed to an existing email (different user)
     if (data.email) {
       const [existingUser] = await db
@@ -142,6 +142,7 @@ export class DatabaseStorage implements IStorage {
       lastName: data.lastName || null,
       email: data.email,
       phoneNumber: data.phoneNumber || null,
+      address: data.address || null,
       role: data.role as any,
       updatedAt: new Date(),
     };

@@ -36,6 +36,7 @@ export default function Admin() {
   const [newUserFirstName, setNewUserFirstName] = useState("");
   const [newUserLastName, setNewUserLastName] = useState("");
   const [newUserPhoneNumber, setNewUserPhoneNumber] = useState("");
+  const [newUserAddress, setNewUserAddress] = useState("");
   const [newUserRole, setNewUserRole] = useState<string>("client");
   
   // Edit user states
@@ -45,6 +46,7 @@ export default function Admin() {
   const [editUserLastName, setEditUserLastName] = useState("");
   const [editUserEmail, setEditUserEmail] = useState("");
   const [editUserPhoneNumber, setEditUserPhoneNumber] = useState("");
+  const [editUserAddress, setEditUserAddress] = useState("");
   const [editUserRole, setEditUserRole] = useState<string>("client");
 
   useEffect(() => {
@@ -166,8 +168,8 @@ export default function Admin() {
   });
 
   const createPreassignedRoleMutation = useMutation({
-    mutationFn: async ({ email, firstName, lastName, phoneNumber, role }: { email: string; firstName?: string; lastName?: string; phoneNumber?: string; role: string }) => {
-      return await apiRequest("POST", "/api/admin/preassigned-roles", { email, firstName, lastName, phoneNumber, role });
+    mutationFn: async ({ email, firstName, lastName, phoneNumber, address, role }: { email: string; firstName?: string; lastName?: string; phoneNumber?: string; address?: string; role: string }) => {
+      return await apiRequest("POST", "/api/admin/preassigned-roles", { email, firstName, lastName, phoneNumber, address, role });
     },
     onSuccess: (_, variables) => {
       toast({
@@ -180,6 +182,7 @@ export default function Admin() {
       setNewUserFirstName("");
       setNewUserLastName("");
       setNewUserPhoneNumber("");
+      setNewUserAddress("");
       setNewUserRole("client");
     },
     onError: (error: Error) => {
@@ -245,6 +248,7 @@ export default function Admin() {
     createPreassignedRoleMutation.mutate({ 
       email: newUserEmail,
       phoneNumber: newUserPhoneNumber, 
+      address: newUserAddress || undefined,
       firstName: newUserFirstName || undefined,
       lastName: newUserLastName || undefined,
       role: newUserRole 
@@ -257,6 +261,7 @@ export default function Admin() {
     setEditUserLastName(userItem.lastName || "");
     setEditUserEmail(userItem.email);
     setEditUserPhoneNumber(userItem.phoneNumber || "");
+    setEditUserAddress(userItem.address || "");
     setEditUserRole(userItem.role);
     setEditUserDialogOpen(true);
   };
@@ -280,6 +285,7 @@ export default function Admin() {
         lastName: editUserLastName || undefined,
         email: editUserEmail,
         phoneNumber: editUserPhoneNumber || undefined,
+        address: editUserAddress || undefined,
         role: editUserRole,
       },
     });
@@ -388,6 +394,17 @@ export default function Admin() {
                     <p className="text-xs text-muted-foreground">
                       Se fornecido, enviará SMS com instruções de acesso
                     </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Endereço (opcional)</Label>
+                    <Input
+                      id="address"
+                      type="text"
+                      placeholder="Rua Exemplo, 123 - Bairro - Cidade/UF"
+                      value={newUserAddress}
+                      onChange={(e) => setNewUserAddress(e.target.value)}
+                      data-testid="input-new-user-address"
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="role">Nível de Acesso</Label>
@@ -534,6 +551,17 @@ export default function Admin() {
                 <p className="text-xs text-muted-foreground">
                   Se fornecido, enviará SMS notificando atualização
                 </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-address">Endereço (opcional)</Label>
+                <Input
+                  id="edit-address"
+                  type="text"
+                  placeholder="Rua Exemplo, 123 - Bairro - Cidade/UF"
+                  value={editUserAddress}
+                  onChange={(e) => setEditUserAddress(e.target.value)}
+                  data-testid="input-edit-user-address"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-role">Nível de Acesso *</Label>

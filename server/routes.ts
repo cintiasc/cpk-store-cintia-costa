@@ -21,6 +21,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User profile route (user updates their own profile)
+  app.patch('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get current user
+      const currentUser = await storage.getUser(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      // Validate allowed fields (no role change for self-update)
+      const { z } = await import('zod');
+      const selfUpdateSchema = z.object({
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        phoneNumber: z.string().max(20).optional().or(z.literal('')),
+        address: z.string().optional().or(z.literal('')),
+      });
+      
+      const validationResult = selfUpdateSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Dados inválidos", 
+          errors: validationResult.error.issues 
+        });
+      }
+      
+      const validatedData = validationResult.data;
+      
+      // Update user (keeping current email and role)
+      const updatedUser = await storage.updateUser(userId, {
+        firstName: validatedData.firstName,
+        lastName: validatedData.lastName,
+        email: currentUser.email, // Keep current email
+        phoneNumber: validatedData.phoneNumber || undefined,
+        address: validatedData.address || undefined,
+        role: currentUser.role, // Keep current role
+      });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Falha ao atualizar perfil" });
+      }
+      
+      res.json(updatedUser);
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: error.message || "Falha ao atualizar perfil" });
+    }
+  });
+
   // Product routes
   app.get('/api/products', async (req, res) => {
     try {

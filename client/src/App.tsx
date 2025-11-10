@@ -14,6 +14,7 @@ import ProductDetail from "@/pages/product-detail";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import Orders from "@/pages/orders";
+import Profile from "@/pages/profile";
 import Dashboard from "@/pages/dashboard";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
@@ -31,6 +32,7 @@ function Router() {
       {/* Protected routes - require authentication */}
       <Route path="/checkout" component={Checkout} />
       <Route path="/orders" component={Orders} />
+      <Route path="/profile" component={Profile} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/admin" component={Admin} />
       
