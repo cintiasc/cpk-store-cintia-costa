@@ -8,6 +8,24 @@ The system provides core e-commerce functionality including product browsing, sh
 
 ## Recent Changes
 
+**November 10, 2025:**
+- ✅ **User Address Management**: Complete implementation of address field for user profiles
+  - Added `address` field (text type) to both users and preassigned_roles tables
+  - Updated all Zod schemas (insertUserSchema, updateUserSchema, insertPreassignedRoleSchema) to include optional address
+  - Enhanced storage layer to handle address in upsertUser and updateUser operations
+  - Authentication flow applies preassigned address on first login (if provided)
+  - Admin can now pre-register users with address (automatically applied on first login)
+  - Admin can edit user addresses via user management panel
+- ✅ **User Profile Page**: New self-service profile management page for all users
+  - Created `/profile` route accessible to all authenticated users via user menu
+  - Users can edit their own firstName, lastName, phoneNumber, and address
+  - Secure implementation: users cannot change their email or role
+  - Created `PATCH /api/user/profile` endpoint with proper authentication
+  - Form correctly hydrates with existing user data using useEffect pattern
+  - Real-time validation and success feedback with toast notifications
+  - E2E tested: preassignment → first login → profile update flow verified
+  - Bug fix: Corrected useState to useEffect for proper async data hydration
+
 **November 4, 2025:**
 - ✅ **Product Reviews from Orders Page**: Clients can now easily review purchased products
   - Created reusable `ReviewModal` component with star rating (1-5) and optional comment
@@ -100,7 +118,8 @@ Preferred communication style: Simple, everyday language.
 **User Roles and Permissions:**
 - **Client (default)**: New users are automatically created with 'client' role on first login
   - Can browse products, manage cart, place orders, write reviews
-  - Access to: `/`, `/products`, `/cart`, `/checkout`, `/orders`
+  - Can edit own profile (name, phone, address) via `/profile`
+  - Access to: `/`, `/products`, `/cart`, `/checkout`, `/orders`, `/profile`
 - **Employee**: Assigned by admin, can manage products and orders
   - All client permissions plus product/order management
   - Access to: `/dashboard` (product management, order queue)
@@ -108,17 +127,26 @@ Preferred communication style: Simple, everyday language.
   - All employee permissions plus user role management
   - Access to: `/admin` (user management, role assignment)
   - Can promote users to employee/admin or demote to client
+  - Can pre-register users with complete information (name, phone, address, role)
 
 **Initial Admin Setup:**
 - First user must be promoted to admin via SQL: `UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';`
 - After that, admins can manage all user roles through the `/admin` panel
-- **Pre-registration system**: Admins can pre-assign roles AND names to users by email before their first login
-  - Supports optional firstName and lastName in preassignment
+- **Pre-registration system**: Admins can pre-assign complete user information before first login
+  - Supports optional firstName, lastName, phoneNumber, address in preassignment
   - If Replit profile lacks names, preassigned names are automatically applied on first login
+  - All preassigned fields (including address) are applied on first login
   - New users automatically receive pre-assigned role during authentication
   - Pre-assigned roles are marked as consumed after first login
   - Supports employee and admin role pre-assignment for controlled access
   - Password is always managed via Replit Auth (OIDC), never stored locally
+
+**User Profile Management:**
+- All authenticated users can access `/profile` to edit their information
+- Users can update: firstName, lastName, phoneNumber, address
+- Security: users cannot change email or role via profile (admin-only actions)
+- Profile form correctly hydrates with existing data using React hooks
+- Changes are saved via `PATCH /api/user/profile` with proper validation
 
 **Password Recovery:**
 - Password recovery is managed through Replit Auth (OIDC provider)
@@ -128,13 +156,13 @@ Preferred communication style: Simple, everyday language.
 ### Database Schema
 
 **Core Tables:**
-1. **users**: User accounts with role-based permissions (client, employee, admin), LGPD acceptance tracking, phone number for SMS notifications
+1. **users**: User accounts with role-based permissions (client, employee, admin), LGPD acceptance tracking, phone number for SMS notifications, address for deliveries
 2. **products**: Cupcake products with name, description, price, image, stock quantity, **isActive** (soft delete flag)
 3. **orders**: Customer orders with status tracking (pending, in_preparation, ready_for_delivery, delivered)
 4. **orderItems**: Individual line items within orders with price snapshot at purchase
 5. **reviews**: Product reviews with ratings (1-5) and comments, linked to verified purchases
 6. **sessions**: Session storage for authentication (required by Replit Auth)
-7. **preassigned_roles**: Pre-assigned roles for users before first login (email, firstName, lastName, phoneNumber, role, createdBy, consumed)
+7. **preassigned_roles**: Pre-assigned roles for users before first login (email, firstName, lastName, phoneNumber, address, role, createdBy, consumed)
 
 **Key Relationships:**
 - Users → Orders (one-to-many)
